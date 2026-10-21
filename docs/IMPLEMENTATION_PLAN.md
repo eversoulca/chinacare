@@ -13,13 +13,15 @@
 - Added homepage copy describing a private, individually coordinated China Care Plan.
 - Added baseline English page title, description, and Open Graph metadata to the HTML shell.
 - Changed the demo inquiry success state so it clearly says that details were not sent or saved.
+- Replaced the public site's green palette with slate blue, warm ivory, and muted terracotta accents.
+- Added installable PWA metadata, app icons, a small offline shell cache, and mobile home-screen instructions.
 
 ## Recommended delivery sequence
 
 1. Confirm production domain, legal company identity, office/contact details, and privacy/terms text.
 2. Restore/connect the project Git repository and verify its GitHub remote and Vercel project linkage.
 3. Add prerendering or migrate the public content to an SSR-capable framework so each public route ships meaningful HTML, route-specific metadata, and canonical URLs.
-4. Connect Supabase with server-side submission, input validation, RLS-protected staff records, and staff authentication before accepting real inquiries.
+4. Connect Supabase with server-side submission, input validation, RLS-protected staff records, and staff authentication before accepting real inquiries. Treat Free-plan auto-pause as a development constraint; do not rely on a once-daily Vercel Hobby cron as an uptime guarantee.
 5. Add secure transactional email only after sender-domain verification and credentials are configured.
 6. Publish only reviewed service/destination content; add sitemap, canonical domain, and search-console submission after the production URL is known.
 

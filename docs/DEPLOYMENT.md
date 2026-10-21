@@ -10,3 +10,5 @@ The workspace is a Vite app and has no Vercel project configuration or linked Gi
 6. Verify the deployed public pages, form states, crawler access, and admin protection before launch.
 
 The existing app is client-rendered. Vercel hosting alone will not make the public routes server-rendered or fully address their crawlability.
+
+The site includes a PWA manifest, app icons, and a service worker for the app shell. Verify installation on an HTTPS preview: Android Chrome should offer Install app; on iPhone/iPad, use Safari's Share menu and Add to Home Screen. A service worker caches the basic shell and visited build assets; it does not cache customer records.

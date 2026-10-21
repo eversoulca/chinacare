@@ -1,4 +1,4 @@
-import { FormEvent, lazy, ReactNode, Suspense, useRef, useState } from "react";
+import { FormEvent, lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import PublicContent, { getContentPage } from "./PublicContent";
 
 const Admin = lazy(() => import("./Admin"));
@@ -249,7 +249,21 @@ function LifeInChina() {
 function AssistantWidget() {
   const [open, setOpen] = useState(false);
   const [contactNotice, setContactNotice] = useState("");
+  const [pastHero, setPastHero] = useState(false);
   const [reply, setReply] = useState("I can explain services, destinations, costs, and travel coordination using approved website information. I cannot provide medical advice.");
+  useEffect(() => {
+    const updateVisibility = () => {
+      const hero = document.querySelector<HTMLElement>(".hero");
+      setPastHero(window.scrollY > (hero?.offsetHeight ?? window.innerHeight));
+    };
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+    };
+  }, []);
   const quickReplies: Record<string, string> = {
     "Health Screening": "Health screening is our primary service. We can help compare confirmed packages, inclusions, estimates, report arrangements, and follow-up options. A qualified professional determines what is appropriate for you.",
     "Plan My Trip": "Our four-stage service covers planning, preparation, support during the visit, and follow-up coordination. Transport, accommodation, and interpretation are subject to availability.",
@@ -257,7 +271,7 @@ function AssistantWidget() {
     "Speak to a Human": "You can use the inquiry form for human follow-up. Telephone and WhatsApp details will appear after real contact channels are provisioned and tested.",
   };
   return <>
-    <div className="floating-contact">
+    <div className={`floating-contact ${pastHero ? "past-hero" : ""}`}>
       <button className="whatsapp-entry" onClick={() => setContactNotice("WhatsApp click-to-chat is awaiting a configured and tested business number.")}><span>WA</span>Chat on WhatsApp</button>
       <button aria-expanded={open} aria-label={open ? "Close China Care Guide Assistant" : "Open China Care Guide Assistant"} className="assistant-launcher" onClick={() => { setOpen(!open); setContactNotice(""); }}><Icon name={open ? "close" : "message"} /><span>{open ? "Close" : "Ask our AI assistant"}</span></button>
     </div>
@@ -545,6 +559,7 @@ function PublicSite() {
             <div><h3>Legal</h3><a href="#legal">Privacy Policy</a><a href="#legal">Terms of Service</a><a href="#legal">Medical Information Disclaimer</a><label className="footer-language">Language<select value={language} onChange={(e) => setLanguage(e.target.value)}><option>English</option><option>中文</option></select></label></div>
           </div>
           <div className="disclaimer"><strong>Medical information disclaimer</strong><p>China Care Guide provides healthcare information and coordination services. It is not a healthcare provider and does not diagnose or treat medical conditions. Service availability, eligibility, prices, and outcomes vary. Medical decisions should be made with qualified healthcare professionals. This service is not intended for medical emergencies.</p><small>Working brand name and legal content are editable pending professional review.</small></div>
+          <div className="pwa-help"><p className="eyebrow">TAKE IT WITH YOU</p><details><summary>Save China Care Guide to your home screen</summary><p>On iPhone or iPad, open this site in Safari, tap Share, then choose “Add to Home Screen.” On Android, open the browser menu and choose “Install app” or “Add to Home screen.”</p></details></div>
           <div className="copyright"><span>© 2025 China Care Guide. Working prototype.</span><span>Canada · Ireland · China</span></div>
         </div>
       </footer>
