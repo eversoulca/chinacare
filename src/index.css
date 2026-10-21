@@ -870,7 +870,9 @@ td small, td strong small { color: var(--crm-muted); display: block; font-size: 
 .floating-contact { align-items: flex-end; bottom: 22px; display: flex; flex-direction: column; gap: 9px; position: fixed; right: 22px; z-index: 70; }
 .assistant-launcher, .whatsapp-entry { align-items: center; border: 0; box-shadow: 0 9px 28px rgba(23,55,47,.18); cursor: pointer; display: flex; font-size: .7rem; font-weight: 600; gap: 9px; min-height: 46px; padding: 10px 16px; }
 .assistant-launcher { background: var(--forest); color: white; }
-.whatsapp-entry { background: white; border: 1px solid var(--line); color: var(--forest); }
+.whatsapp-entry { background: white; border: 1px solid var(--line); color: var(--forest); text-decoration: none; }
+.whatsapp-entry:hover { color: var(--forest-dark); transform: translateY(-1px); }
+.assistant-question { background: var(--forest); color: white; margin-left: auto; }
 .whatsapp-entry span { align-items: center; background: var(--sage); border-radius: 50%; display: flex; font-size: .52rem; height: 24px; justify-content: center; width: 24px; }
 .assistant-panel { background: white; bottom: 82px; box-shadow: 0 24px 70px rgba(18,42,35,.22); max-height: calc(100vh - 110px); overflow: hidden; position: fixed; right: 22px; width: min(390px, calc(100vw - 32px)); z-index: 75; }
 .assistant-panel > header { align-items: center; background: var(--forest-dark); color: white; display: flex; gap: 11px; padding: 17px; }

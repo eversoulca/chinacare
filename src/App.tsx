@@ -251,7 +251,9 @@ function AssistantWidget() {
   const [open, setOpen] = useState(false);
   const [contactNotice, setContactNotice] = useState("");
   const [pastHero, setPastHero] = useState(false);
-  const [reply, setReply] = useState("I can explain services, destinations, costs, and travel coordination using approved website information. I cannot provide medical advice.");
+  const [question, setQuestion] = useState("");
+  const [conversation, setConversation] = useState<Array<{ question: string; answer: string }>>([]);
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER?.replace(/\D/g, "");
   useEffect(() => {
     const updateVisibility = () => {
       const hero = document.querySelector<HTMLElement>(".hero");
@@ -265,25 +267,47 @@ function AssistantWidget() {
       window.removeEventListener("resize", updateVisibility);
     };
   }, []);
+  const answerQuestion = (rawQuestion: string) => {
+    const normalized = rawQuestion.toLowerCase();
+    if (/emergency|urgent|chest pain|can't breathe|cannot breathe|suicid|急诊|紧急|呼吸困难|胸痛/i.test(rawQuestion)) return "China Care Guide is not an emergency service and cannot assess urgent symptoms. Contact local emergency services or a qualified healthcare professional now.";
+    if (/diagnos|should i (take|choose|get)|recommend.*treatment|interpret.*result|medical advice|我该不该|诊断|治疗建议|检查结果/i.test(rawQuestion)) return "I cannot assess symptoms, interpret results, diagnose, or recommend a treatment. Please discuss personal medical questions with a qualified healthcare professional. For urgent symptoms, contact local emergency services.";
+    const ignoredTerms = new Set(["about", "after", "also", "based", "before", "care", "could", "current", "each", "from", "have", "help", "into", "only", "options", "provider", "qualified", "should", "that", "their", "there", "these", "they", "this", "through", "travel", "what", "when", "where", "which", "with", "would", "your"]);
+    const matches = faqs.filter(([q, a]) => {
+      const terms = `${q} ${a}`.toLowerCase().match(/[a-z]{4,}/g)?.filter((term) => !ignoredTerms.has(term)) ?? [];
+      return terms.filter((term) => normalized.includes(term)).length >= 2;
+    }).sort((a, b) => {
+      const score = (entry: string[]) => (entry[0] + " " + entry[1]).toLowerCase().match(/[a-z]{4,}/g)?.filter((term) => !ignoredTerms.has(term) && normalized.includes(term)).length ?? 0;
+      return score(b) - score(a);
+    });
+    if (/human|person|staff|coordinator|agent|人工|真人/i.test(rawQuestion)) return "A human coordinator can follow up through the inquiry form. Please share only general contact details there; do not send medical records or sensitive health information.";
+    if (matches.length) return matches[0][1];
+    return "I can answer general questions using the reviewed information on this website, but I could not find a reliable answer to that. Please use the inquiry form to ask a human coordinator. Do not include medical records or urgent health details.";
+  };
   const quickReplies: Record<string, string> = {
-    "Health Screening": "Health screening is our primary service. We can help compare confirmed packages, inclusions, estimates, report arrangements, and follow-up options. A qualified professional determines what is appropriate for you.",
-    "Plan My Trip": "Our four-stage service covers planning, preparation, support during the visit, and follow-up coordination. Transport, accommodation, and interpretation are subject to availability.",
-    "Ask About Costs": "Estimates should show the original currency, included and excluded services, potential additional charges, validity, and any separate coordination fee.",
-    "Speak to a Human": "You can use the inquiry form for human follow-up. Telephone and WhatsApp details will appear after real contact channels are provisioned and tested.",
+    "Health screening": "What health screening services can I explore?",
+    "Costs & estimates": "How can I request an estimate?",
+    "Travel planning": "What should I know before traveling for surgery?",
+    "Talk to a person": "I would like to speak to a human coordinator.",
+  };
+  const submitQuestion = (rawQuestion: string) => {
+    const cleaned = rawQuestion.trim();
+    if (!cleaned) return;
+    setConversation((current) => [...current, { question: cleaned, answer: answerQuestion(cleaned) }]);
+    setQuestion("");
   };
   return <>
     <div className={`floating-contact ${pastHero ? "past-hero" : ""}`}>
-      <button className="whatsapp-entry" onClick={() => setContactNotice("WhatsApp click-to-chat is awaiting a configured and tested business number.")}><span>WA</span>Chat on WhatsApp</button>
-      <button aria-expanded={open} aria-label={open ? "Close China Care Guide Assistant" : "Open China Care Guide Assistant"} className="assistant-launcher" onClick={() => { setOpen(!open); setContactNotice(""); }}><Icon name={open ? "close" : "message"} /><span>{open ? "Close" : "Ask our AI assistant"}</span></button>
+      {whatsappNumber ? <a className="whatsapp-entry" href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello, I have a general question about China Care Guide.")}`} target="_blank" rel="noreferrer"><span>WA</span>Chat on WhatsApp</a> : <button className="whatsapp-entry" onClick={() => setContactNotice("WhatsApp is not connected yet. Please use the inquiry form for human follow-up.")}><span>WA</span>Chat on WhatsApp</button>}
+      <button aria-expanded={open} aria-label={open ? "Close China Care Guide" : "Open China Care Guide"} className="assistant-launcher" onClick={() => { setOpen(!open); setContactNotice(""); }}><Icon name={open ? "close" : "message"} /><span>{open ? "Close" : "Ask our guide"}</span></button>
     </div>
     {contactNotice && <div className="contact-toast" role="status">{contactNotice}<button aria-label="Dismiss" onClick={() => setContactNotice("")}>×</button></div>}
     {open && <section aria-label="China Care Guide Assistant" className="assistant-panel">
-      <header><span><Icon name="spark" /></span><div><strong>China Care Guide Assistant</strong><small>AI assistant · Website guidance only</small></div><button aria-label="Close assistant" onClick={() => setOpen(false)}><Icon name="close" /></button></header>
+      <header><span><Icon name="spark" /></span><div><strong>China Care Guide</strong><small>Instant answers from reviewed FAQs</small></div><button aria-label="Close assistant" onClick={() => setOpen(false)}><Icon name="close" /></button></header>
       <div className="assistant-safety"><Icon name="shield" size={15} />Do not share medical records or sensitive clinical information here.</div>
-      <div className="assistant-thread"><div className="assistant-message"><strong>Welcome</strong><p>How can I help you explore healthcare coordination in China?</p></div><div className="assistant-message response"><p>{reply}</p></div></div>
-      <div className="quick-replies">{Object.keys(quickReplies).map((item) => <button key={item} onClick={() => setReply(quickReplies[item])}>{item}</button>)}</div>
-      <form onSubmit={(event) => { event.preventDefault(); setReply("I’m not confident I can answer that safely from approved information. Please ask a human coordinator, or contact local emergency services if the situation is urgent."); }}><label><span className="sr-only">Ask a general question</span><input placeholder="Ask a general question…" /></label><button aria-label="Send question" type="submit"><Icon name="arrow" /></button></form>
-      <footer><span>Prototype · No live AI or messaging connection</span><a href="#inquiry" onClick={() => setOpen(false)}>Contact a human</a></footer>
+      <div className="assistant-thread"><div className="assistant-message"><strong>Welcome</strong><p>Ask about services, estimates, travel coordination, or how the inquiry process works.</p></div>{conversation.map((item, index) => <div key={`${index}-${item.question}`}><div className="chat-bubble assistant-question">{item.question}</div><div className="assistant-message response"><p>{item.answer}</p></div></div>)}</div>
+      <div className="quick-replies">{Object.entries(quickReplies).map(([label, prompt]) => <button key={label} onClick={() => submitQuestion(prompt)}>{label}</button>)}</div>
+      <form onSubmit={(event) => { event.preventDefault(); submitQuestion(question); }}><label><span className="sr-only">Ask a general question</span><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Ask a general question…" /></label><button aria-label="Send question" type="submit"><Icon name="arrow" /></button></form>
+      <footer><span>Reviewed website guidance · Not medical advice</span><a href="#inquiry" onClick={() => setOpen(false)}>Contact a human</a></footer>
     </section>}
   </>;
 }

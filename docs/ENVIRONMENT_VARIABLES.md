@@ -7,6 +7,7 @@ Planned public configuration:
 | Variable | Purpose | Exposure |
 | --- | --- | --- |
 | `VITE_SITE_URL` | Production origin for canonical URLs and sitemap generation | Public |
+| `VITE_WHATSAPP_NUMBER` | WhatsApp Business phone number in international format, digits only, without `+` (for example, country code + number) | Public; used only to create a user-initiated `wa.me` link |
 
 Planned server-only Supabase configuration (requires a server/API layer):
 
