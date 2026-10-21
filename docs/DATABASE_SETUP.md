@@ -15,6 +15,12 @@ The server endpoint uses the existing `SUPABASE_URL` and `SUPABASE_ANON_KEY` env
 
 The `/admin` area is a private inquiry inbox, not a full CRM. It reads real inquiries and allows status updates for authorized staff. It does not yet send acknowledgments, provide in-app user management, store an audit trail, or support provider records, quotes, and tasks.
 
+## Social content review queue
+
+The `/admin` workspace includes a private X content queue. Before using it, run `supabase/migrations/20261024000000_social_drafts.sql` in the project's SQL Editor. This creates an RLS-protected `social_drafts` table visible only to authorized staff. Admins and coordinators can request a model draft and review it; read-only staff can view drafts.
+
+In the Vercel `chinacare` project, add `SILICONFLOW_API_KEY` (the replacement key created after rotating any exposed key), `SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1`, and `SILICONFLOW_MODEL=deepseek-ai/DeepSeek-V3` as server-only environment variables, then redeploy. Never use `VITE_` for these variables. The generation endpoint verifies the Supabase staff session and editor role before making one model request and saving the result. Each generation can incur SiliconFlow usage charges. The queue does not publish to X; an editor must approve, copy the text, then publish it manually.
+
 ## Enable staff access
 
 Apply `supabase/migrations/20261023000000_staff_access.sql` after the inquiry migration. This adds invite-only roles (`admin`, `coordinator`, `read_only`) and grants the inbox only to authenticated accounts with a matching row in `staff_access`. Admins and coordinators may update inquiry status; read-only staff may view records.

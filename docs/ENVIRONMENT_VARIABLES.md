@@ -32,4 +32,14 @@ The staff `/admin` inbox also needs public build-time values. The anon/publishab
 | `VITE_SUPABASE_URL` | Supabase project URL used by staff Auth and protected inbox queries | Public build configuration |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/publishable key used with staff sessions | Public build configuration |
 
+Planned SiliconFlow model gateway configuration (only needed when the server-side draft-generation feature is implemented):
+
+| Variable | Purpose | Exposure |
+| --- | --- | --- |
+| `SILICONFLOW_API_KEY` | Authenticates requests to SiliconFlow | Server only; add to Vercel project environment variables, never Git or a `VITE_*` variable |
+| `SILICONFLOW_BASE_URL` | OpenAI-compatible API origin, normally `https://api.siliconflow.cn/v1` | Server only |
+| `SILICONFLOW_MODEL` | Selected model ID, initially `deepseek-ai/DeepSeek-V3` | Server only |
+
+Do not configure an automatic model fallback until the primary model is tested and a monthly spending cap is set; retries can create extra billable requests. Revoke any API key that has been pasted into a chat or otherwise exposed, then create a replacement directly in the provider console.
+
 Do not put credentials in source control. The service-role key must never use a `VITE_*` name. No credentials are present in the repository.

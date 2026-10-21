@@ -543,6 +543,19 @@ footer { background: #202d3d; color: white; padding: 76px 24px 30px; }
 .crm-status.amber { background: #fff4df; border-color: #f0dfbe; color: #96601e; }
 .crm-status.red { background: #fff0ee; border-color: #f0d2cf; color: #9f3e39; }
 .crm-status.blue { background: #eaf3f9; border-color: #d8e7f1; color: #356d9a; }
+.social-generate, .social-drafts { margin-bottom: 20px; }
+.social-controls { align-items: end; display: grid; gap: 12px; grid-template-columns: 1fr auto; padding: 20px 22px 8px; }
+.social-controls label { color: var(--crm-muted); font-size: .68rem; font-weight: 600; grid-column: 1 / -1; margin-bottom: -7px; }
+.social-controls select { background: white; border: 1px solid var(--crm-line); color: var(--crm-text); min-height: 42px; padding: 8px 11px; width: 100%; }
+.social-note { color: var(--crm-muted); font-size: .62rem; margin: 4px 22px 18px; }
+.social-drafts > .card-heading { background: transparent; border: 0; padding: 10px 0 14px; }
+.social-draft { margin-bottom: 12px; padding: 18px 20px; }
+.social-draft-head { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; }
+.social-draft-head .admin-kicker { margin: 0 0 5px; }
+.social-draft-head small { color: var(--crm-muted); font-size: .6rem; }
+.social-draft-copy { color: var(--crm-text); font-size: .88rem; line-height: 1.65; margin: 17px 0; white-space: pre-wrap; }
+.social-draft-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
+.social-open-x { text-decoration: none; }
 .activity-card { padding-bottom: 18px; }
 .timeline { padding: 5px 0; }
 .timeline > div { display: flex; gap: 12px; padding: 9px 0; position: relative; }

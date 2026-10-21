@@ -17,6 +17,7 @@ type Inquiry = {
   general_question: string;
   status: InquiryStatus;
 };
+type SocialDraft = { id: string; created_at: string; topic: string; content: string; status: "draft" | "approved" | "rejected"; model: string };
 
 const statusOptions: { value: InquiryStatus; label: string }[] = [
   { value: "new", label: "New" },
@@ -68,6 +69,7 @@ function Login({ onSubmit, message, busy }: { onSubmit: (email: string) => Promi
 }
 
 function StaffInbox({ session, role, onSignOut }: { session: Session; role: StaffRole; onSignOut: () => void }) {
+  const [section, setSection] = useState<"inquiries" | "content">("inquiries");
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -128,13 +130,13 @@ function StaffInbox({ session, role, onSignOut }: { session: Session; role: Staf
   return <div className="crm-shell staff-shell">
     <aside className="crm-sidebar">
       <div className="sidebar-top"><a className="admin-brand" href="/"><span>CC</span><strong>CareDesk<small>China Care Guide</small></strong></a></div>
-      <nav aria-label="Staff navigation"><button className="active" type="button"><span aria-hidden="true">▤</span><span>Customer inquiries</span></button></nav>
+      <nav aria-label="Staff navigation"><button className={section === "inquiries" ? "active" : ""} onClick={() => setSection("inquiries")} type="button"><span aria-hidden="true">▤</span><span>Customer inquiries</span></button><button className={section === "content" ? "active" : ""} onClick={() => setSection("content")} type="button"><span aria-hidden="true">✎</span><span>Social content</span></button></nav>
       <div className="sidebar-help"><span aria-hidden="true">♧</span><div><strong>Privacy first</strong><p>Use this inbox for coordination details only. Do not store clinical records.</p></div></div>
       <div className="sidebar-user"><span>{session.user.email?.slice(0, 1).toUpperCase() ?? "S"}</span><div><strong>{session.user.email}</strong><small>{role.replace("_", " ")}</small></div><button onClick={onSignOut} type="button">Sign out</button></div>
     </aside>
     <div className="crm-workspace">
-      <header className="crm-topbar"><strong>Private inquiry inbox</strong><div><span className="role-chip">{role.replace("_", " ")}</span><button className="crm-secondary staff-signout" onClick={onSignOut} type="button">Sign out</button></div></header>
-      <main className="crm-main">
+      <header className="crm-topbar"><strong>{section === "inquiries" ? "Private inquiry inbox" : "Social content review"}</strong><div><span className="role-chip">{role.replace("_", " ")}</span><button className="crm-secondary staff-signout" onClick={onSignOut} type="button">Sign out</button></div></header>
+      {section === "content" ? <SocialContent session={session} role={role} /> : <main className="crm-main">
         <div className="page-heading"><div><p className="admin-kicker">CUSTOMER INQUIRIES</p><h1>Inquiry inbox</h1><p>Review basic preferences and coordinate a human follow-up. This is not a medical record system.</p></div><button className="crm-secondary" disabled={loading} onClick={() => void load()} type="button">Refresh</button></div>
         {error && <div className="crm-error" role="alert">{error}</div>}
         {notice && <div className="demo-notice" role="status">{notice}</div>}
@@ -158,9 +160,73 @@ function StaffInbox({ session, role, onSignOut }: { session: Session; role: Staf
             </> : <p className="inquiry-empty">{loading ? "Loading…" : "Select an inquiry to review its details."}</p>}
           </section>
         </div>
-      </main>
+      </main>}
     </div>
   </div>;
+}
+
+const socialTopics = [
+  "Questions to ask before choosing a provider",
+  "What a transparent estimate should include",
+  "Planning language support for a healthcare visit",
+  "Preparing for follow-up after returning home",
+  "Practical medical travel planning checklist",
+  "How to compare service inclusions and exclusions",
+  "A question to ask about medical records",
+];
+
+function SocialContent({ session, role }: { session: Session; role: StaffRole }) {
+  const [drafts, setDrafts] = useState<SocialDraft[]>([]);
+  const [topic, setTopic] = useState(socialTopics[0]);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const canEdit = role === "admin" || role === "coordinator";
+
+  const loadDrafts = async () => {
+    if (!supabase) return;
+    setLoading(true);
+    const { data, error } = await supabase.from("social_drafts").select("id,created_at,topic,content,status,model").order("created_at", { ascending: false }).limit(50);
+    if (error) setMessage("Could not load drafts. Apply the social drafts migration in Supabase first.");
+    else setDrafts((data ?? []) as SocialDraft[]);
+    setLoading(false);
+  };
+  useEffect(() => { void loadDrafts(); }, []);
+
+  const generate = async () => {
+    setBusy(true); setMessage("");
+    try {
+      const response = await fetch("/api/generate-social-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ topic }),
+      });
+      const result = await response.json() as { draft?: SocialDraft; message?: string };
+      if (!response.ok || !result.draft) setMessage(result.message || "Draft generation failed.");
+      else { setDrafts((current) => [result.draft!, ...current]); setMessage("Draft created. Review it before posting."); }
+    } catch { setMessage("Draft generation is temporarily unavailable."); }
+    setBusy(false);
+  };
+
+  const review = async (draft: SocialDraft, status: "approved" | "rejected") => {
+    if (!supabase || !canEdit) return;
+    const { error } = await supabase.from("social_drafts").update({ status, reviewed_by: session.user.id, reviewed_at: new Date().toISOString() }).eq("id", draft.id);
+    if (error) setMessage("Could not update this draft. Check that the social drafts migration is installed.");
+    else { setDrafts((items) => items.map((item) => item.id === draft.id ? { ...item, status } : item)); setMessage(status === "approved" ? "Marked approved. You can now copy it to X." : "Draft rejected."); }
+  };
+
+  const copyDraft = async (content: string) => {
+    await navigator.clipboard.writeText(content);
+    setMessage("Copied. Review and publish manually in X.");
+  };
+
+  return <main className="crm-main">
+    <div className="page-heading"><div><p className="admin-kicker">EDITORIAL WORKFLOW</p><h1>Social content</h1><p>Generate educational X drafts from approved service information. Every post stays private until you review it.</p></div><button className="crm-secondary" disabled={loading} onClick={() => void loadDrafts()} type="button">Refresh</button></div>
+    <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Human review required</strong>Drafts are saved for review and are never published automatically. Do not use this tool for personal health details or clinical advice.</p></div>
+    {message && <div className={message.startsWith("Could") || message.includes("failed") || message.includes("unavailable") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
+    {canEdit && <section className="crm-card social-generate"><div className="card-heading"><div><p className="admin-kicker">NEW DRAFT</p><h2>Generate an educational post</h2></div></div><div className="social-controls"><label htmlFor="social-topic">Choose an approved topic</label><select id="social-topic" onChange={(event) => setTopic(event.target.value)} value={topic}>{socialTopics.map((item) => <option key={item}>{item}</option>)}</select><button className="crm-primary" disabled={busy} onClick={() => void generate()} type="button">{busy ? "Generating…" : "Generate draft"}</button></div><p className="social-note">Uses the server-side SiliconFlow model key. Each click makes one billable model request.</p></section>}
+    <section className="social-drafts"><div className="card-heading"><div><p className="admin-kicker">REVIEW QUEUE</p><h2>Recent drafts</h2></div></div>{loading ? <p className="inquiry-empty">Loading drafts…</p> : drafts.length ? drafts.map((draft) => <article className="crm-card social-draft" key={draft.id}><div className="social-draft-head"><div><p className="admin-kicker">{draft.topic}</p><small>{formatDate(draft.created_at)} · {draft.model}</small></div><span className={`crm-status ${draft.status === "approved" ? "green" : draft.status === "rejected" ? "red" : "blue"}`}>{draft.status}</span></div><p className="social-draft-copy">{draft.content}</p><div className="social-draft-actions">{canEdit && draft.status === "draft" && <><button className="crm-secondary" onClick={() => void review(draft, "rejected")} type="button">Reject</button><button className="crm-secondary" onClick={() => void review(draft, "approved")} type="button">Approve</button></>}{draft.status === "approved" && <><button className="crm-primary" onClick={() => void copyDraft(draft.content)} type="button">Copy post</button><a className="crm-secondary social-open-x" href="https://x.com/compose/post" rel="noreferrer" target="_blank">Open X</a></>}</div></article>) : <div className="crm-card"><p className="inquiry-empty">No drafts yet. Choose a topic above to create the first one.</p></div>}</section>
+  </main>;
 }
 
 export default function Admin() {
