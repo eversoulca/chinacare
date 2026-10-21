@@ -300,6 +300,7 @@ const initialForm: FormData = {
 function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatch<React.SetStateAction<FormData>> }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [serverError, setServerError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
   const update = (key: keyof FormData, value: string | boolean) => {
     setForm((old) => ({ ...old, [key]: value }));
@@ -311,7 +312,7 @@ function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatc
     if (status === "error") setStatus("idle");
   };
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     const next: Record<string, string> = {};
     if (!form.firstName.trim()) next.firstName = "Please enter your first name.";
@@ -326,17 +327,31 @@ function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatc
       window.setTimeout(() => formRef.current?.querySelector<HTMLElement>("[aria-invalid='true']")?.focus(), 0);
       return;
     }
-    setStatus("success");
+    setStatus("loading");
+    setServerError("");
+    try {
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, website: new FormData(formRef.current ?? undefined).get("website") }),
+      });
+      const result = await response.json() as { message?: string };
+      if (!response.ok) throw new Error(result.message || "We could not send your inquiry. Please try again later.");
+      setStatus("success");
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : "We could not send your inquiry. Please try again later.");
+      setStatus("error");
+    }
   };
 
   if (status === "success") {
     return (
       <div className="form-success" role="status">
         <span><Icon name="check" size={26} /></span>
-        <p className="eyebrow">DEMO FORM PREVIEW</p>
-        <h3>Your inquiry is not sent yet.</h3>
-        <p>Your details have not been sent or saved. The form is awaiting a secure submission service, so please do not enter real personal or health information yet.</p>
-        <button className="text-button" onClick={() => { setForm(initialForm); setStatus("idle"); }}>Submit another inquiry</button>
+        <p className="eyebrow">INQUIRY RECEIVED</p>
+        <h3>Thank you, {form.firstName}.</h3>
+        <p>Your inquiry was securely submitted for review. You do not need an account. Please do not email medical records or other sensitive documents unless a coordinator provides a secure method.</p>
+        <button className="text-button" onClick={() => { setForm(initialForm); setStatus("idle"); }}>Send another inquiry</button>
       </div>
     );
   }
@@ -345,7 +360,8 @@ function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatc
   return (
     <form className="inquiry-form" noValidate onSubmit={submit} ref={formRef}>
       <div className="form-intro"><strong>About you and your inquiry</strong><span>Required fields are marked *</span></div>
-      {status === "error" && Object.keys(errors).length > 0 && <div className="error-summary" role="alert"><strong>We need a little more information.</strong><span>Please review the highlighted fields below.</span></div>}
+      {status === "error" && (Object.keys(errors).length > 0 || serverError) && <div className="error-summary" role="alert"><strong>{serverError ? "We could not submit your inquiry." : "We need a little more information."}</strong><span>{serverError || "Please review the highlighted fields below."}</span></div>}
+      <label className="sr-only" aria-hidden="true">Leave this field empty<input autoComplete="off" name="website" tabIndex={-1} type="text" /></label>
       <div className="form-grid">
         <label>First name *<input autoComplete="given-name" aria-describedby={field("firstName")} aria-invalid={!!errors.firstName} value={form.firstName} onChange={(e) => update("firstName", e.target.value)} />{errors.firstName && <small id="firstName-error">{errors.firstName}</small>}</label>
         <label>Email address *<input autoComplete="email" aria-describedby={field("email")} aria-invalid={!!errors.email} inputMode="email" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} />{errors.email && <small id="email-error">{errors.email}</small>}</label>

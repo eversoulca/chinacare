@@ -12,8 +12,8 @@ Planned server-only Supabase configuration (requires a server/API layer):
 
 | Variable | Purpose | Exposure |
 | --- | --- | --- |
-| `SUPABASE_URL` | Supabase project URL | Server only where feasible |
-| `SUPABASE_ANON_KEY` | Public client key; database policies must still enforce access | Public only if needed |
+| `SUPABASE_URL` | Supabase project URL for the inquiry API and keepalive | Server only |
+| `SUPABASE_ANON_KEY` | Public anon/publishable API key used server-side under RLS for inquiry insert and keepalive | Server only in this app |
 | `SUPABASE_SERVICE_ROLE_KEY` | Privileged server operations | Server only; never use in `VITE_*` variables |
 
 Configured Vercel Cron endpoint (the keepalive uses only the public key and a no-data RPC):
