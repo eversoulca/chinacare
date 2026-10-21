@@ -13,7 +13,26 @@ In the correct Supabase project, open **SQL Editor → New query**, paste and ru
 
 The server endpoint uses the existing `SUPABASE_URL` and `SUPABASE_ANON_KEY` environment variables. It never uses a service-role key. For now, an authorized project owner can review incoming records in Supabase **Table Editor → customer_inquiries**. Do not give staff database-owner access as a substitute for CRM roles.
 
-The current `/admin` area remains a visual prototype with fictional sample records. It is not connected to Supabase and does not provide real staff authentication or authorization. Do not use it to manage real customer records. The next backend phase is invite-only staff login, role-aware CRM endpoints and tables for activity, providers, quotes, tasks, and email logs. Each table must have RLS and staff authorization before it is exposed.
+The `/admin` area is a private inquiry inbox, not a full CRM. It reads real inquiries and allows status updates for authorized staff. It does not yet send acknowledgments, provide in-app user management, store an audit trail, or support provider records, quotes, and tasks.
+
+## Enable staff access
+
+Apply `supabase/migrations/20261023000000_staff_access.sql` after the inquiry migration. This adds invite-only roles (`admin`, `coordinator`, `read_only`) and grants the inbox only to authenticated accounts with a matching row in `staff_access`. Admins and coordinators may update inquiry status; read-only staff may view records.
+
+1. In Supabase **Authentication → Users**, invite the first staff email address. The account must exist before a role can be assigned.
+2. In SQL Editor, replace the example email and run this once to grant that person admin access:
+
+   ```sql
+   insert into public.staff_access (user_id, email, role)
+   select id, email, 'admin' from auth.users where lower(email) = lower('owner@example.com')
+   on conflict (user_id) do update set email = excluded.email, role = excluded.role;
+   ```
+
+3. In Supabase **Authentication → URL Configuration**, add `https://eversoul.ca/admin` to the allowed redirect URLs.
+4. In the Vercel `chinacare` project, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the same values as `SUPABASE_URL` and `SUPABASE_ANON_KEY`. These are public URL/key values; RLS provides the authorization boundary. Never add a service-role/secret key under a `VITE_` name.
+5. Redeploy. Open `https://eversoul.ca/admin` and request a sign-in link for the invited email. Grant access only to people who should see inquiry contact details.
+
+The UI does not create users. Staff invitations and role grants are administrator-controlled. Supabase's default email service may only deliver to team-authorized addresses and is intended for low-volume testing; configure custom SMTP if it cannot deliver to the invited address.
 
 The inquiry form requests only contact and planning details. Do not ask visitors to submit diagnoses, medical records, passport data, or payment details through it. Confirm retention, privacy wording, data location, and cross-border handling before promoting the form for business use.
 

@@ -24,4 +24,11 @@ Configured Vercel Cron endpoint (the keepalive uses only the public key and a no
 | `SUPABASE_ANON_KEY` | Supabase anon/publishable API key used for the harmless `keepalive` RPC | Server only in this endpoint |
 | `CRON_SECRET` | Random bearer secret used to reject public calls to the Vercel endpoint | Server only; generate a long random value |
 
-Do not put credentials in source control or browser-exposed `VITE_*` variables. No credentials are present or needed to build the current prototype.
+The staff `/admin` inbox also needs public build-time values. The anon/publishable key is designed for browser use; RLS is the authorization boundary. Never expose a service-role/secret key in a `VITE_*` variable.
+
+| Variable | Purpose | Exposure |
+| --- | --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL used by staff Auth and protected inbox queries | Public build configuration |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/publishable key used with staff sessions | Public build configuration |
+
+Do not put credentials in source control. The service-role key must never use a `VITE_*` name. No credentials are present in the repository.

@@ -16,14 +16,15 @@
 - Replaced the public site's green palette with slate blue, warm ivory, and muted terracotta accents.
 - Added installable PWA metadata, app icons, a small offline shell cache, and mobile home-screen instructions.
 - Added the customer inquiry table with restrictive RLS, a validated same-origin Vercel submission API, basic honeypot filtering, and real submission/error states in the public form. Visitors do not need accounts.
+- Replaced the demonstration `/admin` login and fictional lead records with invite-only Supabase magic-link access, role-gated inquiry viewing, and status updates.
 
 ## Recommended delivery sequence
 
 1. Confirm production domain, legal company identity, office/contact details, and privacy/terms text.
 2. Restore/connect the project Git repository and verify its GitHub remote and Vercel project linkage.
 3. Add prerendering or migrate the public content to an SSR-capable framework so each public route ships meaningful HTML, route-specific metadata, and canonical URLs.
-4. Apply `20261022000000_customer_inquiries.sql` to the production Supabase project before enabling the form for real submissions. Review early submissions in Supabase Table Editor; the demo `/admin` is not an authenticated CRM.
-5. Implement invite-only Supabase Auth for staff and role-protected CRM APIs/tables before storing operational notes, provider details, quotes, or tasks. Treat Free-plan auto-pause as a development constraint; keepalive is not an uptime guarantee.
+4. Apply the inquiry and staff-access migrations; invite the owner, grant the initial `admin` role, configure the Vercel public Supabase values and Auth redirect allowlist, then verify staff login and RLS behavior.
+5. Add staff invitation/role management, assignment, status audit history, and exports with explicit authorization before broadening CRM use. Treat Free-plan auto-pause as a development constraint; keepalive is not an uptime guarantee.
 6. Add secure transactional email only after sender-domain verification and credentials are configured. Do not claim an acknowledgment email is sent until delivery is integrated.
 7. Publish only reviewed service/destination content; add sitemap, canonical domain, and search-console submission after the production URL is known.
 
