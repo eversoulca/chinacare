@@ -1,5 +1,6 @@
 import { FormEvent, lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import PublicContent, { getContentPage } from "./PublicContent";
+import { changeLocale, languages, localizedPath, localizeLinkClick, parseLocalizedPath, type Locale } from "./routing";
 
 const Admin = lazy(() => import("./Admin"));
 
@@ -386,38 +387,57 @@ function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatc
   );
 }
 
-function PublicSite() {
+const localeNotice: Record<Locale, string> = {
+  en: "",
+  zh: "此页面目前仅提供英文内容。其他语言内容正在准备中。",
+  ko: "현재 이 페이지는 영어로 제공됩니다. 다른 언어 콘텐츠를 준비하고 있습니다.",
+  ja: "現在、このページは英語で提供されています。他の言語のコンテンツを準備中です。",
+  fr: "Cette page est actuellement disponible en anglais. Les autres langues sont en préparation.",
+  es: "Esta página está disponible actualmente en inglés. Estamos preparando otros idiomas.",
+};
+
+function PublicSite({ locale }: { locale: Locale }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [language, setLanguage] = useState("English");
   const [form, setForm] = useState<FormData>(initialForm);
   const selectService = (service: string) => setForm((old) => ({ ...old, service }));
   const selectCity = (city: string) => setForm((old) => ({ ...old, city }));
   const closeMenu = () => setMenuOpen(false);
 
+  useEffect(() => {
+    document.documentElement.lang = "en";
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]') ?? document.createElement("link");
+    canonical.rel = "canonical";
+    const englishUrl = new URL(localizedPath(window.location.pathname, "en"), window.location.origin);
+    canonical.href = englishUrl.href;
+    if (!canonical.parentNode) document.head.append(canonical);
+  }, [locale]);
+
   return (
-    <div className="site-shell">
+    <div className="site-shell" onClick={(event) => localizeLinkClick(event, locale)}>
       <a className="skip-link" href="#main">Skip to content</a>
       <header className="site-header">
         <div className="nav-wrap">
           <a className="brand" href="#top" onClick={closeMenu}><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a>
           <nav aria-label="Primary navigation" className={menuOpen ? "nav-links open" : "nav-links"}>
-            <a href="#screening" onClick={closeMenu}>Health Screening</a>
-            <a href="#aesthetics" onClick={closeMenu}>Medical Aesthetics</a>
-            <a href="#recovery" onClick={closeMenu}>Recovery & TCM</a>
-            <a href="#concierge" onClick={closeMenu}>Travel Concierge</a>
-            <a href="#destinations" onClick={closeMenu}>Destinations</a>
-            <a href="#process" onClick={closeMenu}>How It Works</a>
-            <a href="#about" onClick={closeMenu}>About Us</a>
+            <a href="/services/health-screening-in-china" onClick={closeMenu}>Health Screening</a>
+            <a href="/services/medical-aesthetics-in-china" onClick={closeMenu}>Medical Aesthetics</a>
+            <a href="/services/rehabilitation-in-china" onClick={closeMenu}>Recovery & TCM</a>
+            <a href="/services/medical-travel-concierge" onClick={closeMenu}>Travel Concierge</a>
+            <a href="/destinations/" onClick={closeMenu}>Destinations</a>
+            <a href="/how-it-works" onClick={closeMenu}>How It Works</a>
+            <a href="/about" onClick={closeMenu}>About Us</a>
             <a className="mobile-cta" href="#inquiry" onClick={closeMenu}>Plan My Visit</a>
           </nav>
           <div className="nav-actions">
-            <label className="language"><Icon name="globe" size={16} /><span className="sr-only">Language</span><select value={language} onChange={(e) => setLanguage(e.target.value)}><option>English</option><option>中文</option></select></label>
+            <label className="language"><Icon name="globe" size={16} /><span className="sr-only">Language</span><select aria-label="Choose language" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label>
             <a className="button nav-plan" href="#inquiry">Build My Care Plan</a>
             <button aria-expanded={menuOpen} aria-label={menuOpen ? "Close menu" : "Open menu"} className="menu-button" onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? "close" : "menu"} size={24} /></button>
           </div>
         </div>
       </header>
+
+      {locale !== "en" && <div className="locale-notice" role="status">{localeNotice[locale]}</div>}
 
       <main id="main">
         <section className="hero" id="top">
@@ -571,8 +591,8 @@ function PublicSite() {
           <div className="footer-top">
             <div className="footer-brand"><a className="brand" href="#top"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><p>Explore healthcare in China, with confidence and clarity.</p></div>
             <div><h3>Services</h3><a href="/services/health-screening-in-china">Health Screening</a><a href="/services/medical-aesthetics-in-china">Medical Aesthetics</a><a href="/services/healthy-aging">Healthy Aging</a><a href="/services/rehabilitation-in-china">Rehabilitation & Recovery</a><a href="/services/tcm-integrative-care">TCM & Integrative Care</a><a href="/services/medical-travel-concierge">Travel Concierge</a></div>
-            <div><h3>Explore</h3><a href="#destinations">Destinations</a><a href="#process">How It Works</a><a href="/resources/">Resources</a><a href="#about">About Us</a><a href="#inquiry">Contact</a><span className="footer-phone">Business telephone: pending provisioning and testing</span></div>
-            <div><h3>Legal</h3><a href="#legal">Privacy Policy</a><a href="#legal">Terms of Service</a><a href="#legal">Medical Information Disclaimer</a><label className="footer-language">Language<select value={language} onChange={(e) => setLanguage(e.target.value)}><option>English</option><option>中文</option></select></label></div>
+            <div><h3>Explore</h3><a href="/destinations/">Destinations</a><a href="/how-it-works">How It Works</a><a href="/resources/">Resources</a><a href="/about">About Us</a><a href="/#inquiry">Contact</a><span className="footer-phone">Business telephone: pending provisioning and testing</span></div>
+            <div><h3>Legal</h3><a href="#legal">Privacy Policy</a><a href="#legal">Terms of Service</a><a href="#legal">Medical Information Disclaimer</a><label className="footer-language">Language<select aria-label="Choose language" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></div>
           </div>
           <div className="disclaimer"><strong>Medical information disclaimer</strong><p>China Care Guide provides healthcare information and coordination services. It is not a healthcare provider and does not diagnose or treat medical conditions. Service availability, eligibility, prices, and outcomes vary. Medical decisions should be made with qualified healthcare professionals. This service is not intended for medical emergencies.</p><small>Working brand name and legal content are editable pending professional review.</small></div>
           <div className="pwa-help"><p className="eyebrow">TAKE IT WITH YOU</p><details><summary>Save China Care Guide to your home screen</summary><p>On iPhone or iPad, open this site in Safari, tap Share, then choose “Add to Home Screen.” On Android, open the browser menu and choose “Install app” or “Add to Home screen.”</p></details></div>
@@ -587,7 +607,21 @@ function PublicSite() {
 export default function App() {
   const path = window.location.pathname;
   if (path === "/admin" || path.startsWith("/admin/")) return <Suspense fallback={<div className="route-loading">Loading private workspace…</div>}><Admin /></Suspense>;
-  const contentPage = getContentPage(path.endsWith("/") ? path : path);
-  if (contentPage) return <PublicContent page={contentPage} />;
-  return <PublicSite />;
+  const route = parseLocalizedPath(path);
+  if (!route.locale) return <LocaleRedirect />;
+  const contentPage = getContentPage(route.path);
+  if (contentPage) return <PublicContent locale={route.locale} page={contentPage} />;
+  return <PublicSite locale={route.locale} />;
+}
+
+function LocaleRedirect() {
+  useEffect(() => {
+    window.location.replace(`/${localizedDefaultPath(window.location.pathname)}${window.location.search}${window.location.hash}`);
+  }, []);
+  return <div className="route-loading">Opening English version…</div>;
+}
+
+function localizedDefaultPath(pathname: string) {
+  const path = pathname.replace(/^\/+/, "");
+  return path ? `en/${path}` : "en/";
 }

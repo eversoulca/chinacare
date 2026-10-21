@@ -1,8 +1,12 @@
 import { useEffect } from "react";
+import { changeLocale, languages, localizeLinkClick, type Locale } from "./routing";
 
 type Page = { title: string; description: string; eyebrow: string; intro: string; sections: [string, string][] };
 
 const pages: Record<string, Page> = {
+  "/about": { title: "About China Care Guide | China Care Guide", description: "Learn how China Care Guide supports informed, individualized healthcare travel planning with transparent coordination.", eyebrow: "ABOUT CHINA CARE GUIDE", intro: "We help international customers investigate and coordinate planned healthcare options in China, with clear information and practical support tailored to each inquiry.", sections: [["A coordination service", "China Care Guide organizes information, provider questions, estimates, and practical arrangements. We are not a healthcare provider, insurer, or emergency service."], ["Individually coordinated", "Each inquiry is reviewed against the person's stated interests, destination, timing, and practical questions. Service and provider availability are confirmed individually."], ["Clear limits", "We do not diagnose, recommend clinical treatment, guarantee availability or outcomes, or replace advice from qualified healthcare professionals."]] },
+  "/how-it-works": { title: "How Healthcare Coordination Works | China Care Guide", description: "Understand the steps from a general inquiry through provider research, estimate review, and practical planning.", eyebrow: "HOW IT WORKS", intro: "A clear, human process helps you understand available options before deciding whether to proceed.", sections: [["1. Share a general inquiry", "Tell us your service interest, preferred destination, and approximate timeframe. No account or medical documents are required."], ["2. We investigate current options", "Our team asks about service availability, provider information, appointment requirements, costs, and language support for your particular inquiry."], ["3. Review the details", "We organize what is confirmed, what is estimated, what is excluded, and what still requires provider or clinical confirmation."], ["4. Decide at your pace", "You decide whether to proceed. Clinical suitability and treatment decisions remain with qualified healthcare professionals."]] },
+  "/destinations/": { title: "Healthcare Destinations in China | China Care Guide", description: "Explore cities currently considered for individual healthcare inquiries and confirm service availability case by case.", eyebrow: "DESTINATIONS IN CHINA", intro: "Shanghai, Beijing, Changchun, Dalian, and Harbin are current areas of interest. Each service, provider, and appointment is confirmed for the individual inquiry.", sections: [["Shanghai and Beijing", "These cities are current focus areas for individual inquiries. Availability, provider details, and appointment options still require current confirmation."], ["Changchun, Dalian, and Harbin", "These cities are considered inquiry by inquiry. Do not assume every service or provider is available in every city."], ["Plan the full trip", "Consider local transport, accommodation, translation, recovery time, records, and follow-up along with the proposed service."]] },
   "/services/health-screening-in-china": { title: "Health Screening in China | China Care Guide", description: "Explore health screening in China with clear package, provider, cost, travel, and follow-up questions for international customers.", eyebrow: "HEALTH SCREENING IN CHINA", intro: "Understand available examination options, what a package includes, and the practical details to clarify before planning travel.", sections: [["What can we help you compare?", "We can investigate available screening packages, provider information, appointment requirements, stated inclusions, exclusions, original-currency estimates, and follow-up arrangements."], ["What should you clarify?", "Ask which examinations are included, who reviews results, how reports are provided, whether additional tests may cost more, and what follow-up is available after you return home."], ["Important limitation", "China Care Guide coordinates information and inquiries. We do not recommend a screening plan, diagnose conditions, or replace advice from qualified healthcare professionals."]] },
   "/services/medical-aesthetics-in-china": { title: "Medical Aesthetics in China | China Care Guide", description: "Explore medical aesthetics in China with responsible information about consultation, providers, costs, recovery, and limitations.", eyebrow: "MEDICAL AESTHETICS IN CHINA", intro: "Compare confirmed options with attention to practitioner scope, informed consent, recovery, follow-up, and the full cost of travel.", sections: [["Start with a qualified consultation", "Availability and suitability must be assessed by an appropriately qualified professional. Ask who performs the procedure and what consultation is required."], ["Compare the full proposal", "Review the procedure, provider, stated risks, recovery plan, included services, exclusions, potential extras, currency, and quote validity."], ["No outcome guarantees", "Results, eligibility, recovery, and satisfaction cannot be guaranteed. Do not make travel commitments before key clinical and practical details are confirmed."]] },
   "/services/healthy-aging": { title: "Healthy Aging Services in China | China Care Guide", description: "Explore evidence-supported healthy-aging and skin-health services in China with responsible coordination and clear limitations.", eyebrow: "HEALTHY AGING", intro: "Explore confirmed, evidence-supported services without claims to reverse aging, predict lifespan, or guarantee an individual outcome.", sections: [["Start with realistic goals", "Healthy-aging services should be presented with balanced evidence, clear scope, and appropriate professional consultation."], ["Separate wellness from clinical care", "We clarify whether an option is a medical service delivered by a qualified provider or a non-medical wellness experience."], ["No predictive promises", "No test or service can independently predict exact lifespan or guarantee a successful anti-aging plan."]] },
@@ -24,18 +28,30 @@ export function getContentPage(path: string) {
   return pages[path] ?? null;
 }
 
-export default function PublicContent({ page }: { page: Page }) {
+const localeNotice: Record<Locale, string> = {
+  en: "",
+  zh: "此页面目前仅提供英文内容。其他语言内容正在准备中。",
+  ko: "현재 이 페이지는 영어로 제공됩니다. 다른 언어 콘텐츠를 준비하고 있습니다.",
+  ja: "現在、このページは英語で提供されています。他の言語のコンテンツを準備中です。",
+  fr: "Cette page est actuellement disponible en anglais. Les autres langues sont en préparation.",
+  es: "Esta página está disponible actualmente en inglés. Estamos preparando otros idiomas.",
+};
+
+export default function PublicContent({ page, locale }: { page: Page; locale: Locale }) {
   useEffect(() => {
     document.title = page.title;
+    document.documentElement.lang = "en";
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.append(meta); }
     meta.content = page.description;
     let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.append(canonical); }
-    canonical.href = window.location.href.split("#")[0];
+    const canonicalPath = locale === "en" ? window.location.pathname : `/en${window.location.pathname.replace(/^\/(en|zh|ko|ja|fr|es)(?=\/|$)/, "") || "/"}`;
+    canonical.href = `${window.location.origin}${canonicalPath}`;
   }, [page]);
-  return <div className="content-page">
-    <header className="content-nav"><a className="brand" href="/"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><nav><a href="/#process">How it works</a><a href="/resources/">Resources</a><a className="button" href="/#inquiry">Plan my visit</a></nav></header>
+  return <div className="content-page" onClick={(event) => localizeLinkClick(event, locale)}>
+    <header className="content-nav"><a className="brand" href="/"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><nav><a href="/#process">How it works</a><a href="/resources/">Resources</a><a className="button" href="/#inquiry">Plan my visit</a><label className="content-language">Language<select aria-label="Choose language" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></nav></header>
+    {locale !== "en" && <div className="locale-notice" role="status">{localeNotice[locale]}</div>}
     <main>
       <div className="breadcrumbs"><a href="/">Home</a><span>/</span><span>{page.eyebrow.toLowerCase()}</span></div>
       <section className="content-hero"><p className="eyebrow">{page.eyebrow}</p><h1>{page.title.split(" | ")[0]}</h1><p>{page.intro}</p><a className="button" href="/#inquiry">Request an individual review</a></section>

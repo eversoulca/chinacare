@@ -1,10 +1,10 @@
 {
-  "id": "/",
+  "id": "/en/",
   "name": "China Care Guide",
   "short_name": "Care Guide",
   "description": "Explore healthcare options in China and coordinate a personalized care journey.",
   "lang": "en",
-  "start_url": "/",
+  "start_url": "/en/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#faf8f4",

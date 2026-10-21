@@ -1,5 +1,5 @@
-const CACHE_NAME = "china-care-guide-shell-v1";
-const APP_SHELL = ["/", "/site.webmanifest", "/pwa-192.png", "/pwa-512.png", "/apple-touch-icon.png"];
+const CACHE_NAME = "china-care-guide-shell-v2";
+const APP_SHELL = ["/", "/en/", "/site.webmanifest", "/pwa-192.png", "/pwa-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -25,14 +25,14 @@ self.addEventListener("fetch", (event) => {
           if (response.ok) {
             try {
               const cache = await caches.open(CACHE_NAME);
-              await cache.put("/", response.clone());
+              await cache.put(request, response.clone());
             } catch {
               // Keep the online page available if storage is unavailable.
             }
           }
           return response;
         })
-        .catch(() => caches.match("/").then((response) => response || Response.error()))
+        .catch(() => caches.match(request).then((response) => response || caches.match("/en/")).then((response) => response || Response.error()))
     );
     return;
   }
