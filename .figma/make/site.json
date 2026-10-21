@@ -1,0 +1,12 @@
+{
+  "title": "China Care Guide | Healthcare Coordination in China",
+  "description": "Explore planned healthcare in China with clear service information, cost transparency, and international coordination from China Care Guide.",
+  "language": "en",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
