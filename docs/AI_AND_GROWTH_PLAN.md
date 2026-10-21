@@ -51,9 +51,55 @@ WhatsApp Platform messaging is not a zero-cost guarantee: free-form replies are 
 4. Add the WhatsApp Cloud API and server-side model only after there is a verified business number, a suitable privacy notice, a human coverage plan, and a clear reason to incur any usage cost.
 5. Add social listening only through official APIs or platform-native tools with terms-compliant access. Keep replies human-approved.
 
+## Proposed operating system
+
+### WhatsApp support
+
+First check the WhatsApp Business app under **Tools → AI agent**. Meta Business Agent is rolling out only to selected businesses and countries, and not every language is supported. Where available, it can answer new one-to-one customer chats and lets the business control which conversations receive AI replies and take over a chat. Teach it only approved service and logistics facts. Explicitly instruct it not to diagnose, assess eligibility, promise results/prices/availability, or request health records; route those questions to a human or clinician. The language available may depend on the business phone number's country.
+
+If the native agent is unavailable or cannot meet the handoff/privacy requirements, add an official Cloud API webhook and our own server-side assistant later. Do not automate WhatsApp Web or an ordinary app session. Use the existing account for private, user-started support; do not send unsolicited marketing messages. WhatsApp Status is a separate ephemeral update feature; the official Cloud API material covers customer messaging, so do not plan to auto-publish Status through the messaging API. Publish public education posts to X/Instagram/Facebook instead and optionally share a manually approved version to Status.
+
+### Social content workflow
+
+1. A daily content job selects one unused topic from an approved bank and creates one short educational post. Store the topic, draft, source FAQ(s), created time, destination platform, uniqueness key, and status in Supabase.
+2. Run a strict factual and safety check: source every claim to approved site content, remove invented prices/providers/statistics/outcomes, reject personal medical recommendations, avoid urgency/discount language, and vary the format and angle. Enforce topic cooldowns and normalized-text similarity checks against the last 90 days.
+3. For the initial two weeks, send every post to a private approval queue. Show the proposed post, a short rationale/source, platform preview, and buttons for Edit, Approve & publish, and Reject. An approval records the staff user and timestamp.
+4. After reviewing at least two weeks of drafts, optionally auto-publish only low-risk evergreen explainers that pass all checks. Keep case-specific, medical, cost, provider, legal/visa, and time-sensitive posts in human review. Start with one post daily; increase only if quality and audience response support it.
+5. Scan public posts through the official platform API four times per day, initially for a narrow set of non-clinical intent phrases such as “health check in China”, “China hospital international patient”, and “medical travel planning”. Store a link and a short excerpt only, deduplicate by platform post ID, and rank possible relevance. Do not collect private messages or sensitive health details.
+6. Generate a contextual reply draft only for a human-reviewed candidate. The draft should answer the actual question first, disclose the China Care Guide connection naturally when relevant, avoid repeated links, and offer the site as optional further reading. Default action is **Open post + copy draft** so a human publishes in the native app. Do not use scripted browser posting.
+
+### Platform rollout
+
+- **Start with X**, because X was the platform you mentioned. X's current pay-per-use page lists $0.005 for a Post Read and $0.015 for a Post Create. A rough cap of 10 fetched posts per scan × 4 scans/day is about 1,200 reads/month or $6/month, plus around $0.45 for 30 daily posts; actual charges depend on resources returned and the current rate card. Keep an API credit limit and stop scans before the cap. X requires prior written approval to run an AI-powered automated reply bot, and keyword-only unsolicited replies are prohibited. Therefore, keep replies as human-reviewed drafts; do not auto-reply. Automated informational posts can be considered after quality review, subject to account consent and anti-spam rules.
+- **Instagram/Facebook** can be added later if you create/convert to Professional accounts and authorize a Meta app. Meta's official Instagram API supports publishing for eligible Professional accounts and some interactions/search, but it requires app permissions and an authorized token. We should not assume it offers a broad search across all public social conversations.
+- If your WhatsApp Business app exposes Meta Business Agent, use that for inbound chat support rather than building a custom bot first. This does not publish the daily social posts.
+
+### Scheduler, hosting, and budget
+
+- Use Supabase Cron for several daily scans, with a hard daily request cap, per-run limits, idempotency, retries with backoff, and a pause switch. Vercel Hobby cron schedules must be no more frequent than daily per job; one every-six-hours expression does not fit that limit. Several separately configured daily jobs may be possible, but confirm deployment validation before relying on them.
+- Important plan mismatch: Vercel documents Hobby for personal, non-commercial use. Since China Care Guide is a business marketing site, review whether to move to Vercel Pro or move the production site/functions to a host whose current terms support your commercial use. Avoid building the growth scheduler around an assumption that a free Hobby plan permits commercial operation.
+- AI model calls need a separate API key and usage billing; ChatGPT subscription access does not provide an API key. X reads/writes also have usage charges. Keep both secrets server-side and set a small monthly ceiling before enabling scheduled work. No background AI or API-based social scan can be promised as zero-cost.
+- Human approval is the safe launch mode. Autopublish is a later opt-in for posts only, with emergency stop, duplicate detection, failed-post alerts, logs, and no auto-reply to strangers.
+
+## Inputs required before connecting accounts
+
+No passwords, OTPs, or tokens should be sent in chat. The owner will need to:
+
+1. Check whether **Tools → AI agent** is available in WhatsApp Business.
+2. Decide which social account to connect first. X is the proposed first channel.
+3. Create/authorize an X Developer app with the required read/search and write scopes, then store the generated credentials in Vercel server-only variables. Never put tokens in `VITE_` variables or Git.
+4. Choose a monthly cap for X API reads and the model API. The initial estimate above uses only 10 results per scan; more results increase cost.
+
+The public account posts and social replies must always be reviewed by the account owner until the account has an established, approved workflow.
+
 ## Source policy references
 
 - [X automation rules](https://help.x.com/en/rules-and-policies/x-automation?lang=browser)
 - [X authenticity rules](https://help.x.com/en/rules-and-policies/authenticity)
 - [WhatsApp Business Platform getting started](https://faq.whatsapp.com/5773272372736965/)
 - [Meta WhatsApp Cloud API collection](https://www.postman.com/meta/whatsapp-business-platform/documentation/wlk6lh4/whatsapp-cloud-api)
+- [Meta Business Agent for WhatsApp setup](https://faq.whatsapp.com/1153795669452207/?cms_platform=web)
+- [Meta's official Instagram API](https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api)
+- [X Developer Platform pay-per-use pricing](https://developer.x.com/)
+- [Vercel Hobby plan and usage terms](https://vercel.com/docs/plans/hobby)
+- [Vercel cron usage and pricing](https://vercel.com/docs/cron-jobs/usage-and-pricing)
