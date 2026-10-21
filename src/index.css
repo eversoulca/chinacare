@@ -985,9 +985,9 @@ td small, td strong small { color: var(--crm-muted); display: block; font-size: 
   .life-grid { grid-template-columns: 1fr; }
   .life-note { align-items: flex-start; grid-template-columns: auto 1fr; }
   .life-note a { grid-column: 2; }
-  .floating-contact { bottom: 14px; right: 14px; transition: opacity .2s, transform .2s; }
-  .floating-contact:not(.past-hero) { opacity: 0; pointer-events: none; transform: translateY(8px); }
-  .whatsapp-entry { display: none; }
+  .floating-contact { bottom: calc(14px + env(safe-area-inset-bottom)); right: 14px; transition: opacity .2s, transform .2s; }
+  .floating-contact:not(.past-hero) { opacity: 1; pointer-events: auto; transform: none; }
+  .whatsapp-entry { align-items: center; border-radius: 50%; display: flex; font-size: 0; height: 50px; justify-content: center; padding: 0; width: 50px; }
   .assistant-panel { bottom: 72px; right: 16px; }
   .contact-toast { bottom: 75px; right: 14px; }
   .conversation-detail > header { align-items: flex-start; flex-direction: column; gap: 10px; }
