@@ -25,7 +25,7 @@ Example: “We can ask participating providers for a current estimate. It should
 
 ### Stage 1 — click-to-chat (no API, lowest cost)
 
-Create or use one real WhatsApp Business number yourself, then add the international-format number to the Vercel `chinacare` project as `VITE_WHATSAPP_NUMBER` and redeploy. A visitor starts the conversation and WhatsApp opens on their device. An on-call human can reply using the WhatsApp Business app. Do not create multiple accounts automatically; phone verification and account ownership must remain with the business owner.
+The current click-to-chat link works with a regular WhatsApp account. For a public business presence, back up the account and migrate the same number to the free WhatsApp Business app. Meta says account information, chat history, and media can migrate, while Messenger and Business apps cannot use the same number simultaneously. A visitor starts the conversation and WhatsApp opens on their device. An on-call human can reply in the Business app. See [WhatsApp's migration instructions](https://faq.whatsapp.com/3059780464322392/?cms_platform=android&locale=en_US). Do not create multiple accounts automatically; phone verification and account ownership must remain with the owner.
 
 ### Stage 2 — shared inbox and automation
 
@@ -55,9 +55,11 @@ WhatsApp Platform messaging is not a zero-cost guarantee: free-form replies are 
 
 ### WhatsApp support
 
-First check the WhatsApp Business app under **Tools → AI agent**. Meta Business Agent is rolling out only to selected businesses and countries, and not every language is supported. Where available, it can answer new one-to-one customer chats and lets the business control which conversations receive AI replies and take over a chat. Teach it only approved service and logistics facts. Explicitly instruct it not to diagnose, assess eligibility, promise results/prices/availability, or request health records; route those questions to a human or clinician. The language available may depend on the business phone number's country.
+The current number is on regular WhatsApp Messenger. For business use, back up and migrate it to the free WhatsApp Business app; Meta's migration flow can transfer account information and chat history, but the same number cannot be active in both apps at once. See [WhatsApp's migration instructions](https://faq.whatsapp.com/3059780464322392/?cms_platform=android&locale=en_US).
 
-If the native agent is unavailable or cannot meet the handoff/privacy requirements, add an official Cloud API webhook and our own server-side assistant later. Do not automate WhatsApp Web or an ordinary app session. Use the existing account for private, user-started support; do not send unsolicited marketing messages. WhatsApp Status is a separate ephemeral update feature; the official Cloud API material covers customer messaging, so do not plan to auto-publish Status through the messaging API. Publish public education posts to X/Instagram/Facebook instead and optionally share a manually approved version to Status.
+Then check the WhatsApp Business app under **Tools → AI agent**. Meta Business Agent is rolling out only to selected businesses and countries, and not every language is supported. Where available, it can answer new one-to-one customer chats and lets the business control which conversations receive AI replies and take over a chat. This uses Meta's agent, not DeepSeek. Teach it only approved service and logistics facts. Explicitly instruct it not to diagnose, assess eligibility, promise results/prices/availability, or request health records; route those questions to a human or clinician. The language available may depend on the business phone number's country.
+
+If the native agent is unavailable and you specifically want DeepSeek, add the official Cloud API webhook and our own server-side assistant later. The regular app does not provide a supported connection to a custom model API. Meta onboarding and number setup are required; verify the currently offered number/app coexistence flow before changing registration. Do not automate WhatsApp Web or an ordinary app session. Use the account for private, user-started support; do not send unsolicited marketing messages. WhatsApp Status is a separate ephemeral update feature; the official Cloud API material covers customer messaging, so do not plan to auto-publish Status through the messaging API. Publish public education posts to X/Instagram/Facebook instead and optionally share a manually approved version to Status.
 
 ### Social content workflow
 
@@ -71,6 +73,7 @@ If the native agent is unavailable or cannot meet the handoff/privacy requiremen
 ### Platform rollout
 
 - **Start with X**, because X was the platform you mentioned. X's current pay-per-use page lists $0.005 for a Post Read and $0.015 for a Post Create. A rough cap of 10 fetched posts per scan × 4 scans/day is about 1,200 reads/month or $6/month, plus around $0.45 for 30 daily posts; actual charges depend on resources returned and the current rate card. Keep an API credit limit and stop scans before the cap. X requires prior written approval to run an AI-powered automated reply bot, and keyword-only unsolicited replies are prohibited. Therefore, keep replies as human-reviewed drafts; do not auto-reply. Automated informational posts can be considered after quality review, subject to account consent and anti-spam rules.
+- Use **DeepSeek Flash** for first-pass drafts and classifying short public excerpts. Its API is OpenAI-compatible and billed by tokens; add a server-only `DEEPSEEK_API_KEY`, never a `VITE_` variable. Only send approved site content and short public post excerpts, never customers' health details. See [DeepSeek model pricing](https://api-docs.deepseek.com/quick_start/pricing/) and its [Chat Completions API](https://api-docs.deepseek.com/api/create-chat-completion/).
 - **Instagram/Facebook** can be added later if you create/convert to Professional accounts and authorize a Meta app. Meta's official Instagram API supports publishing for eligible Professional accounts and some interactions/search, but it requires app permissions and an authorized token. We should not assume it offers a broad search across all public social conversations.
 - If your WhatsApp Business app exposes Meta Business Agent, use that for inbound chat support rather than building a custom bot first. This does not publish the daily social posts.
 
@@ -78,17 +81,18 @@ If the native agent is unavailable or cannot meet the handoff/privacy requiremen
 
 - Use Supabase Cron for several daily scans, with a hard daily request cap, per-run limits, idempotency, retries with backoff, and a pause switch. Vercel Hobby cron schedules must be no more frequent than daily per job; one every-six-hours expression does not fit that limit. Several separately configured daily jobs may be possible, but confirm deployment validation before relying on them.
 - Important plan mismatch: Vercel documents Hobby for personal, non-commercial use. Since China Care Guide is a business marketing site, review whether to move to Vercel Pro or move the production site/functions to a host whose current terms support your commercial use. Avoid building the growth scheduler around an assumption that a free Hobby plan permits commercial operation.
-- AI model calls need a separate API key and usage billing; ChatGPT subscription access does not provide an API key. X reads/writes also have usage charges. Keep both secrets server-side and set a small monthly ceiling before enabling scheduled work. No background AI or API-based social scan can be promised as zero-cost.
+- AI model calls need a separate API key and usage billing. X reads/writes also have usage charges. Keep both secrets server-side and set a small monthly ceiling before enabling scheduled work. No background AI or API-based social scan can be promised as zero-cost.
 - Human approval is the safe launch mode. Autopublish is a later opt-in for posts only, with emergency stop, duplicate detection, failed-post alerts, logs, and no auto-reply to strangers.
 
 ## Inputs required before connecting accounts
 
 No passwords, OTPs, or tokens should be sent in chat. The owner will need to:
 
-1. Check whether **Tools → AI agent** is available in WhatsApp Business.
-2. Decide which social account to connect first. X is the proposed first channel.
-3. Create/authorize an X Developer app with the required read/search and write scopes, then store the generated credentials in Vercel server-only variables. Never put tokens in `VITE_` variables or Git.
-4. Choose a monthly cap for X API reads and the model API. The initial estimate above uses only 10 results per scan; more results increase cost.
+1. Back up and migrate the number from WhatsApp Messenger to WhatsApp Business if you want a business profile; then check **Tools → AI agent**.
+2. Create/use the brand's X account. A regular X account is the public publishing identity; a separate X Developer app and OAuth authorization from the account owner are required for API scanning and in-app publishing.
+3. Create/authorize an X Developer app with read/search and write scopes, then store credentials as server-only Vercel variables. If you publish manually in X, no API write token is needed. Never put tokens in `VITE_` variables or Git.
+4. Create a DeepSeek API account/key and set a usage budget. Add `DEEPSEEK_API_KEY` server-side; do not send the key in chat.
+5. Choose a monthly cap for X API reads. The initial estimate uses only 10 results per scan; more results increase cost.
 
 The public account posts and social replies must always be reviewed by the account owner until the account has an established, approved workflow.
 
@@ -103,3 +107,6 @@ The public account posts and social replies must always be reviewed by the accou
 - [X Developer Platform pay-per-use pricing](https://developer.x.com/)
 - [Vercel Hobby plan and usage terms](https://vercel.com/docs/plans/hobby)
 - [Vercel cron usage and pricing](https://vercel.com/docs/cron-jobs/usage-and-pricing)
+- [WhatsApp Messenger to WhatsApp Business migration](https://faq.whatsapp.com/3059780464322392/?cms_platform=android&locale=en_US)
+- [DeepSeek API pricing](https://api-docs.deepseek.com/quick_start/pricing/)
+- [DeepSeek Chat Completions API](https://api-docs.deepseek.com/api/create-chat-completion/)
