@@ -40,7 +40,7 @@ Apply `supabase/migrations/20261023000000_staff_access.sql` after the inquiry mi
 
 3. In Supabase **Authentication → URL Configuration**, add `https://eversoul.ca/admin` to the allowed redirect URLs.
 4. In the Vercel `chinacare` project, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the same values as `SUPABASE_URL` and `SUPABASE_ANON_KEY`. These are public URL/key values; RLS provides the authorization boundary. Never add a service-role/secret key under a `VITE_` name.
-5. Redeploy. Open `https://eversoul.ca/admin` and request a sign-in link for the invited email. Grant access only to people who should see inquiry contact details.
+5. Redeploy. Open `https://eversoul.ca/admin` and request an email verification code for the invited email. Configure Supabase Auth → Email Templates → Magic Link to include `{{ .Token }}` (instead of only `{{ .ConfirmationURL }}`) so Supabase sends a code that can be entered on the computer even when email is read on a phone. Grant access only to people who should see inquiry contact details.
 
 The UI does not create users. Staff invitations and role grants are administrator-controlled. Supabase's default email service may only deliver to team-authorized addresses and is intended for low-volume testing; configure custom SMTP if it cannot deliver to the invited address.
 
