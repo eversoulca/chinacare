@@ -37,7 +37,7 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
-function Login({ onSubmit, message, busy }: { onSubmit: (email: string, password: string) => Promise<void>; message: string; busy: boolean }) {
+function Login({ onSubmit, onForgotPassword, message, busy }: { onSubmit: (email: string, password: string) => Promise<void>; onForgotPassword: (email: string) => Promise<void>; message: string; busy: boolean }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -60,12 +60,40 @@ function Login({ onSubmit, message, busy }: { onSubmit: (email: string, password
           <label>Work email<input autoComplete="email" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
           <label>Password<input autoComplete="current-password" name="password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
           <button className="crm-primary" disabled={busy} type="submit">{busy ? "Signing in…" : "Sign in"}</button>
+          <button className="text-action" disabled={busy || !email.trim()} onClick={() => void onForgotPassword(email.trim())} type="button">Forgot password?</button>
         </form>
       </>}
       <p className="login-foot">Authorized team members only</p>
     </section>
     <aside className="login-aside"><div><p className="admin-kicker">PRIVATE BY DESIGN</p><blockquote>Keep every inquiry clear, considered, and in the right hands.</blockquote></div><small>For coordination only. This workspace is not a clinical record system.</small></aside>
   </main>;
+}
+
+function PasswordReset() {
+  const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!supabase) return;
+    if (password !== confirmation) { setMessage("The passwords do not match."); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setMessage(error ? "We could not update the password. Please request a new recovery email." : "Password updated. You can now sign in.");
+    setBusy(false);
+    if (!error) window.setTimeout(() => window.location.assign("/admin"), 1200);
+  };
+  return <main className="login-page"><section className="login-panel">
+    <a className="admin-brand" href="/"><span>CC</span><strong>China Care Guide</strong></a>
+    <div className="login-copy"><p className="admin-kicker">ACCOUNT SECURITY</p><h1>Set a new password</h1><p>Choose a password for your staff account.</p></div>
+    <form className="login-form" onSubmit={submit}>
+      {message && <div className={message.startsWith("We ") || message.startsWith("The ") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
+      <label>New password<input autoComplete="new-password" minLength={8} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
+      <label>Confirm new password<input autoComplete="new-password" minLength={8} onChange={(event) => setConfirmation(event.target.value)} required type="password" value={confirmation} /></label>
+      <button className="crm-primary" disabled={busy} type="submit">{busy ? "Updating…" : "Save password"}</button>
+    </form>
+  </section><aside className="login-aside"><div><p className="admin-kicker">PRIVATE BY DESIGN</p><blockquote>Keep every inquiry clear, considered, and in the right hands.</blockquote></div><small>For coordination only. This workspace is not a clinical record system.</small></aside></main>;
 }
 
 function StaffInbox({ session, role, onSignOut }: { session: Session; role: StaffRole; onSignOut: () => void }) {
@@ -283,6 +311,7 @@ export default function Admin() {
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const isPasswordReset = window.location.pathname === "/admin/reset-password";
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
@@ -295,6 +324,7 @@ export default function Admin() {
   }, []);
 
   useEffect(() => {
+    if (isPasswordReset) return;
     if (!supabase) { setChecking(false); return; }
     let alive = true;
     void supabase.auth.getSession().then(({ data }) => {
@@ -307,9 +337,10 @@ export default function Admin() {
       if (!nextSession) setChecking(false);
     });
     return () => { alive = false; subscription.unsubscribe(); };
-  }, []);
+  }, [isPasswordReset]);
 
   useEffect(() => {
+    if (isPasswordReset) return;
     if (!supabase || !session) { setRole(null); return; }
     let alive = true;
     setChecking(true);
@@ -328,7 +359,7 @@ export default function Admin() {
       setChecking(false);
     });
     return () => { alive = false; };
-  }, [session]);
+  }, [isPasswordReset, session]);
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) return;
@@ -339,8 +370,18 @@ export default function Admin() {
     setBusy(false);
   };
 
+  const sendPasswordReset = async (email: string) => {
+    if (!supabase) return;
+    setBusy(true);
+    setMessage("");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/admin/reset-password` });
+    setMessage(error ? "We could not send a password reset email. Check the address and try again." : "If this account exists, a password reset email has been sent.");
+    setBusy(false);
+  };
+
   const signOut = async () => { await supabase?.auth.signOut(); setSession(null); setRole(null); setAuthorized(false); };
+  if (isPasswordReset) return <PasswordReset />;
   if (checking) return <div className="route-loading">Checking staff access…</div>;
-  if (!session || !authorized || !role) return <Login busy={busy} message={message} onSubmit={signIn} />;
+  if (!session || !authorized || !role) return <Login busy={busy} message={message} onForgotPassword={sendPasswordReset} onSubmit={signIn} />;
   return <StaffInbox onSignOut={() => void signOut()} role={role} session={session} />;
 }

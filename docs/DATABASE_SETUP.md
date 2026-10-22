@@ -38,7 +38,7 @@ Apply `supabase/migrations/20261023000000_staff_access.sql` after the inquiry mi
    on conflict (user_id) do update set email = excluded.email, role = excluded.role;
    ```
 
-3. In Supabase **Authentication → URL Configuration**, add `https://eversoul.ca/admin` to the allowed redirect URLs.
+3. In Supabase **Authentication → URL Configuration**, add `https://eversoul.ca/admin` and `https://eversoul.ca/admin/reset-password` to the allowed redirect URLs.
 4. In the Vercel `chinacare` project, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the same values as `SUPABASE_URL` and `SUPABASE_ANON_KEY`. These are public URL/key values; RLS provides the authorization boundary. Never add a service-role/secret key under a `VITE_` name.
 5. Redeploy. Open `https://eversoul.ca/admin` and sign in with the invited staff email and its password. Passwords must be set using Supabase Auth's supported user management flow; never update `auth.users` with SQL or expose a service-role key in the browser. Grant access only to people who should see inquiry contact details.
 
