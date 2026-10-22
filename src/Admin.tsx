@@ -377,9 +377,11 @@ export default function Admin() {
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/admin/reset-password` });
     const reason = error?.message.toLowerCase() ?? "";
     const friendlyError = reason.includes("rate limit") || reason.includes("security purposes")
-      ? "Supabase has temporarily limited password reset emails. Please wait before requesting another one."
+      ? "Supabase's built-in email service is limited to 2 authentication emails per hour across this project. Wait before trying again; if this keeps happening, a custom email provider will be needed."
       : reason.includes("redirect") || reason.includes("not allowed")
         ? "Supabase rejected the return address. The allowed redirect must include https://eversoul.ca/admin/reset-password."
+        : reason.includes("email address not authorized")
+          ? "Supabase's built-in email service does not authorize this recipient. A custom email provider is needed for this address."
         : reason.includes("smtp") || reason.includes("email")
           ? "Supabase could not send this email. Its built-in mail service has strict limits; try again later or configure a mail provider."
           : "We could not send a password reset email. Please verify the account email and try again.";
