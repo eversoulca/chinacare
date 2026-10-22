@@ -252,7 +252,10 @@ function AssistantWidget() {
   const [contactNotice, setContactNotice] = useState("");
   const [pastHero, setPastHero] = useState(false);
   const [question, setQuestion] = useState("");
-  const [conversation, setConversation] = useState<Array<{ question: string; answer: string }>>([]);
+  const [conversation, setConversation] = useState<Array<{ question: string; answer: string; handoff?: boolean; emergency?: boolean }>>([]);
+  const [assistantBusy, setAssistantBusy] = useState(false);
+  const [assistantError, setAssistantError] = useState("");
+  const threadRef = useRef<HTMLDivElement>(null);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER?.replace(/\D/g, "");
   useEffect(() => {
     const updateVisibility = () => {
@@ -267,33 +270,34 @@ function AssistantWidget() {
       window.removeEventListener("resize", updateVisibility);
     };
   }, []);
-  const answerQuestion = (rawQuestion: string) => {
-    const normalized = rawQuestion.toLowerCase();
-    if (/emergency|urgent|chest pain|can't breathe|cannot breathe|suicid|急诊|紧急|呼吸困难|胸痛/i.test(rawQuestion)) return "China Care Guide is not an emergency service and cannot assess urgent symptoms. Contact local emergency services or a qualified healthcare professional now.";
-    if (/diagnos|should i (take|choose|get)|recommend.*treatment|interpret.*result|medical advice|我该不该|诊断|治疗建议|检查结果/i.test(rawQuestion)) return "I cannot assess symptoms, interpret results, diagnose, or recommend a treatment. Please discuss personal medical questions with a qualified healthcare professional. For urgent symptoms, contact local emergency services.";
-    const ignoredTerms = new Set(["about", "after", "also", "based", "before", "care", "could", "current", "each", "from", "have", "help", "into", "only", "options", "provider", "qualified", "should", "that", "their", "there", "these", "they", "this", "through", "travel", "what", "when", "where", "which", "with", "would", "your"]);
-    const matches = faqs.filter(([q, a]) => {
-      const terms = `${q} ${a}`.toLowerCase().match(/[a-z]{4,}/g)?.filter((term) => !ignoredTerms.has(term)) ?? [];
-      return terms.filter((term) => normalized.includes(term)).length >= 2;
-    }).sort((a, b) => {
-      const score = (entry: string[]) => (entry[0] + " " + entry[1]).toLowerCase().match(/[a-z]{4,}/g)?.filter((term) => !ignoredTerms.has(term) && normalized.includes(term)).length ?? 0;
-      return score(b) - score(a);
-    });
-    if (/human|person|staff|coordinator|agent|人工|真人/i.test(rawQuestion)) return "A human coordinator can follow up through the inquiry form. Please share only general contact details there; do not send medical records or sensitive health information.";
-    if (matches.length) return matches[0][1];
-    return "I can answer general questions using the reviewed information on this website, but I could not find a reliable answer to that. Please use the inquiry form to ask a human coordinator. Do not include medical records or urgent health details.";
-  };
   const quickReplies: Record<string, string> = {
     "Health screening": "What health screening services can I explore?",
     "Costs & estimates": "How can I request an estimate?",
     "Travel planning": "What should I know before traveling for surgery?",
     "Talk to a person": "I would like to speak to a human coordinator.",
   };
-  const submitQuestion = (rawQuestion: string) => {
+  useEffect(() => { if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight; }, [conversation, assistantBusy]);
+  const submitQuestion = async (rawQuestion: string) => {
     const cleaned = rawQuestion.trim();
-    if (!cleaned) return;
-    setConversation((current) => [...current, { question: cleaned, answer: answerQuestion(cleaned) }]);
+    if (!cleaned || assistantBusy) return;
     setQuestion("");
+    setAssistantError("");
+    setAssistantBusy(true);
+    try {
+      const history = conversation.flatMap((item) => [{ role: "user", content: item.question }, { role: "assistant", content: item.answer }]).slice(-8);
+      const response = await fetch("/api/assistant-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: cleaned, history }),
+      });
+      const result = await response.json() as { answer?: string; handoff?: boolean; emergency?: boolean; message?: string };
+      if (!response.ok || !result.answer) throw new Error(result.message || "The assistant is temporarily unavailable.");
+      setConversation((current) => [...current, { question: cleaned, answer: result.answer!, handoff: result.handoff, emergency: result.emergency }]);
+    } catch (error) {
+      setAssistantError(error instanceof Error ? error.message : "The assistant is temporarily unavailable. Please try again.");
+    } finally {
+      setAssistantBusy(false);
+    }
   };
   return <>
     <div className={`floating-contact ${pastHero ? "past-hero" : ""}`}>
@@ -302,12 +306,12 @@ function AssistantWidget() {
     </div>
     {contactNotice && <div className="contact-toast" role="status">{contactNotice}<button aria-label="Dismiss" onClick={() => setContactNotice("")}>×</button></div>}
     {open && <section aria-label="China Care Guide Assistant" className="assistant-panel">
-      <header><span><Icon name="spark" /></span><div><strong>China Care Guide</strong><small>Instant answers from reviewed FAQs</small></div><button aria-label="Close assistant" onClick={() => setOpen(false)}><Icon name="close" /></button></header>
-      <div className="assistant-safety"><Icon name="shield" size={15} />Do not share medical records or sensitive clinical information here.</div>
-      <div className="assistant-thread"><div className="assistant-message"><strong>Welcome</strong><p>Ask about services, estimates, travel coordination, or how the inquiry process works.</p></div>{conversation.map((item, index) => <div key={`${index}-${item.question}`}><div className="chat-bubble assistant-question">{item.question}</div><div className="assistant-message response"><p>{item.answer}</p></div></div>)}</div>
-      <div className="quick-replies">{Object.entries(quickReplies).map(([label, prompt]) => <button key={label} onClick={() => submitQuestion(prompt)}>{label}</button>)}</div>
-      <form onSubmit={(event) => { event.preventDefault(); submitQuestion(question); }}><label><span className="sr-only">Ask a general question</span><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Ask a general question…" /></label><button aria-label="Send question" type="submit"><Icon name="arrow" /></button></form>
-      <footer><span>Reviewed website guidance · Not medical advice</span><a href="#inquiry" onClick={() => setOpen(false)}>Contact a human</a></footer>
+      <header><span><Icon name="spark" /></span><div><strong>China Care Guide</strong><small>AI guide · human support available</small></div><button aria-label="Close assistant" onClick={() => setOpen(false)}><Icon name="close" /></button></header>
+      <div className="assistant-safety"><Icon name="shield" size={15} />AI-generated answers; your question is sent to our AI provider. Don't share medical records or sensitive health details.</div>
+      <div className="assistant-thread" ref={threadRef}><div className="assistant-message"><strong>Welcome</strong><p>Ask about services, estimates, travel coordination, or how the inquiry process works.</p></div>{conversation.map((item, index) => <div key={`${index}-${item.question}`}><div className="chat-bubble assistant-question">{item.question}</div><div className="assistant-message response"><p>{item.answer}</p>{item.handoff && !item.emergency && <a href="#inquiry" onClick={() => setOpen(false)}>Contact a human coordinator</a>}</div></div>)}{assistantBusy && <div className="assistant-message" role="status">Thinking…</div>}{assistantError && <div className="crm-error" role="alert">{assistantError}</div>}</div>
+      <div className="quick-replies">{Object.entries(quickReplies).map(([label, prompt]) => <button disabled={assistantBusy} key={label} onClick={() => void submitQuestion(prompt)}>{label}</button>)}</div>
+      <form onSubmit={(event) => { event.preventDefault(); void submitQuestion(question); }}><label><span className="sr-only">Ask a general question</span><input disabled={assistantBusy} value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Ask a general question…" /></label><button aria-label="Send question" disabled={assistantBusy} type="submit"><Icon name="arrow" /></button></form>
+      <footer><span>General information · Not medical advice</span><a href="#inquiry" onClick={() => setOpen(false)}>Contact a human</a></footer>
     </section>}
   </>;
 }
