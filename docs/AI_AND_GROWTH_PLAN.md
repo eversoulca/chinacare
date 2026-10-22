@@ -90,7 +90,7 @@ No passwords, OTPs, or tokens should be sent in chat. The owner will need to:
 
 1. Back up and migrate the number from WhatsApp Messenger to WhatsApp Business if you want a business profile; then check **Tools → AI agent**.
 2. Create/use the brand's X account. A regular X account is the public publishing identity; a separate X Developer app and OAuth authorization from the account owner are required for API scanning and in-app publishing.
-3. Create/authorize an X Developer app with read/search and write scopes, then store credentials as server-only Vercel variables. If you publish manually in X, no API write token is needed. Never put tokens in `VITE_` variables or Git.
+3. Create an X Developer app and authorize `@iecnvan` in CareDesk. For OAuth publishing, set the callback to `https://eversoul.ca/api/x-callback`, enable the OAuth 2.0 confidential Web App flow, and request `tweet.read`, `tweet.write`, `users.read`, and `offline.access`. Keep app credentials as server-only Vercel variables; never put tokens in `VITE_` variables or Git.
 4. Create a SiliconFlow API key, set a usage budget, and add it only as a server-side Vercel environment variable. Do not send keys in chat or commit them.
 5. Choose a monthly cap for X API reads. The initial estimate uses only 10 results per scan; more results increase cost.
 

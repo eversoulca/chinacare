@@ -17,7 +17,7 @@ type Inquiry = {
   general_question: string;
   status: InquiryStatus;
 };
-type SocialDraft = { id: string; created_at: string; topic: string; content: string; status: "draft" | "approved" | "rejected"; model: string };
+type SocialDraft = { id: string; created_at: string; topic: string; content: string; status: "draft" | "approved" | "rejected" | "publishing" | "published"; model: string; published_post_id?: string | null };
 
 const statusOptions: { value: InquiryStatus; label: string }[] = [
   { value: "new", label: "New" },
@@ -181,6 +181,9 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [xUsername, setXUsername] = useState("");
+  const [xConnected, setXConnected] = useState(false);
+  const [xBusy, setXBusy] = useState(false);
   const canEdit = role === "admin" || role === "coordinator";
 
   const loadDrafts = async () => {
@@ -191,7 +194,20 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
     else setDrafts((data ?? []) as SocialDraft[]);
     setLoading(false);
   };
-  useEffect(() => { void loadDrafts(); }, []);
+  const loadXStatus = async () => {
+    try {
+      const response = await fetch("/api/x-status", { headers: { Authorization: `Bearer ${session.access_token}` } });
+      const result = await response.json() as { connected?: boolean; username?: string };
+      setXConnected(Boolean(result.connected)); setXUsername(result.username || "");
+    } catch { setXConnected(false); }
+  };
+  useEffect(() => {
+    void loadDrafts(); void loadXStatus();
+    const result = new URLSearchParams(window.location.search).get("x");
+    if (result === "connected") setMessage("X account connected. Approved drafts can now be published after your final click.");
+    if (result === "error") setMessage("X account connection did not complete. Check app settings and authorized account, then try again.");
+    if (result) window.history.replaceState({}, "", window.location.pathname);
+  }, []);
 
   const generate = async () => {
     setBusy(true); setMessage("");
@@ -220,12 +236,44 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
     setMessage("Copied. Review and publish manually in X.");
   };
 
+  const connectX = async () => {
+    setXBusy(true); setMessage("");
+    try {
+      const response = await fetch("/api/x-connect-start", { method: "POST", headers: { Authorization: `Bearer ${session.access_token}` } });
+      const result = await response.json() as { authorizeUrl?: string; message?: string };
+      if (!response.ok || !result.authorizeUrl) setMessage(result.message || "Could not start X authorization.");
+      else window.location.assign(result.authorizeUrl);
+    } catch { setMessage("Could not start X authorization."); }
+    setXBusy(false);
+  };
+
+  const publishToX = async (draft: SocialDraft) => {
+    if (!window.confirm("Publish this approved post to X now? This action may incur an X API charge.")) return;
+    setXBusy(true); setMessage("");
+    setDrafts((items) => items.map((item) => item.id === draft.id ? { ...item, status: "publishing" } : item));
+    try {
+      const response = await fetch("/api/x-publish", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ id: draft.id }) });
+      const result = await response.json() as { username?: string; postId?: string; message?: string };
+      if (!response.ok) {
+        setMessage(result.message || "Could not publish the post.");
+        if (result.message?.includes("available to retry") || result.message?.includes("Connect the approved X account")) setDrafts((items) => items.map((item) => item.id === draft.id ? { ...item, status: "approved" } : item));
+      } else {
+        setDrafts((items) => items.map((item) => item.id === draft.id ? { ...item, status: "published", published_post_id: result.postId } : item));
+        setMessage(`Published to @${result.username}.`);
+      }
+    } catch {
+      setMessage("Publishing result is unknown. Check the X account before trying again; this draft stays locked to avoid a duplicate.");
+    }
+    await loadXStatus(); setXBusy(false);
+  };
+
   return <main className="crm-main">
     <div className="page-heading"><div><p className="admin-kicker">EDITORIAL WORKFLOW</p><h1>Social content</h1><p>Generate educational X drafts from approved service information. Every post stays private until you review it.</p></div><button className="crm-secondary" disabled={loading} onClick={() => void loadDrafts()} type="button">Refresh</button></div>
     <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Human review required</strong>Drafts are saved for review and are never published automatically. Do not use this tool for personal health details or clinical advice.</p></div>
+    <section className="crm-card x-connect-card"><div><p className="admin-kicker">X ACCOUNT</p><strong>{xConnected ? `Connected as @${xUsername}` : "Not connected"}</strong><p>{xConnected ? "Only approved drafts can be sent. Each post needs your final confirmation." : "Connect the account that owns @iecnvan. X Developer API credentials must be configured first."}</p></div><button className="crm-secondary" disabled={!canEdit || xBusy} onClick={() => void connectX()} type="button">{xBusy ? "Working…" : xConnected ? "Reconnect X" : "Connect X"}</button></section>
     {message && <div className={message.startsWith("Could") || message.includes("failed") || message.includes("unavailable") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
     {canEdit && <section className="crm-card social-generate"><div className="card-heading"><div><p className="admin-kicker">NEW DRAFT</p><h2>Generate an educational post</h2></div></div><div className="social-controls"><label htmlFor="social-topic">Choose an approved topic</label><select id="social-topic" onChange={(event) => setTopic(event.target.value)} value={topic}>{socialTopics.map((item) => <option key={item}>{item}</option>)}</select><button className="crm-primary" disabled={busy} onClick={() => void generate()} type="button">{busy ? "Generating…" : "Generate draft"}</button></div><p className="social-note">Uses the server-side SiliconFlow model key. Each click makes one billable model request.</p></section>}
-    <section className="social-drafts"><div className="card-heading"><div><p className="admin-kicker">REVIEW QUEUE</p><h2>Recent drafts</h2></div></div>{loading ? <p className="inquiry-empty">Loading drafts…</p> : drafts.length ? drafts.map((draft) => <article className="crm-card social-draft" key={draft.id}><div className="social-draft-head"><div><p className="admin-kicker">{draft.topic}</p><small>{formatDate(draft.created_at)} · {draft.model}</small></div><span className={`crm-status ${draft.status === "approved" ? "green" : draft.status === "rejected" ? "red" : "blue"}`}>{draft.status}</span></div><p className="social-draft-copy">{draft.content}</p><div className="social-draft-actions">{canEdit && draft.status === "draft" && <><button className="crm-secondary" onClick={() => void review(draft, "rejected")} type="button">Reject</button><button className="crm-secondary" onClick={() => void review(draft, "approved")} type="button">Approve</button></>}{draft.status === "approved" && <><button className="crm-primary" onClick={() => void copyDraft(draft.content)} type="button">Copy post</button><a className="crm-secondary social-open-x" href="https://x.com/compose/post" rel="noreferrer" target="_blank">Open X</a></>}</div></article>) : <div className="crm-card"><p className="inquiry-empty">No drafts yet. Choose a topic above to create the first one.</p></div>}</section>
+    <section className="social-drafts"><div className="card-heading"><div><p className="admin-kicker">REVIEW QUEUE</p><h2>Recent drafts</h2></div></div>{loading ? <p className="inquiry-empty">Loading drafts…</p> : drafts.length ? drafts.map((draft) => <article className="crm-card social-draft" key={draft.id}><div className="social-draft-head"><div><p className="admin-kicker">{draft.topic}</p><small>{formatDate(draft.created_at)} · {draft.model}</small></div><span className={`crm-status ${draft.status === "approved" || draft.status === "published" ? "green" : draft.status === "rejected" ? "red" : "blue"}`}>{draft.status}</span></div><p className="social-draft-copy">{draft.content}</p><div className="social-draft-actions">{canEdit && draft.status === "draft" && <><button className="crm-secondary" onClick={() => void review(draft, "rejected")} type="button">Reject</button><button className="crm-secondary" onClick={() => void review(draft, "approved")} type="button">Approve</button></>}{draft.status === "approved" && <><button className="crm-primary" disabled={xBusy || !xConnected || !canEdit} onClick={() => void publishToX(draft)} type="button">Publish to X</button><button className="crm-secondary" onClick={() => void copyDraft(draft.content)} type="button">Copy post</button><a className="crm-secondary social-open-x" href="https://x.com/compose/post" rel="noreferrer" target="_blank">Open X</a></>}{draft.status === "published" && draft.published_post_id && <a className="crm-secondary social-open-x" href={`https://x.com/${xUsername || "iecnvan"}/status/${draft.published_post_id}`} rel="noreferrer" target="_blank">View on X</a>}</div></article>) : <div className="crm-card"><p className="inquiry-empty">No drafts yet. Choose a topic above to create the first one.</p></div>}</section>
   </main>;
 }
 

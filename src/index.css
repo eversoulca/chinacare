@@ -556,6 +556,10 @@ footer { background: #202d3d; color: white; padding: 76px 24px 30px; }
 .social-draft-copy { color: var(--crm-text); font-size: .88rem; line-height: 1.65; margin: 17px 0; white-space: pre-wrap; }
 .social-draft-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
 .social-open-x { text-decoration: none; }
+.x-connect-card { align-items: center; display: flex; justify-content: space-between; margin: 0 0 18px; padding: 18px 20px; }
+.x-connect-card .admin-kicker { margin: 0 0 5px; }
+.x-connect-card strong { font-size: .82rem; }
+.x-connect-card p:last-child { color: var(--crm-muted); font-size: .64rem; line-height: 1.5; margin: 5px 0 0; }
 .activity-card { padding-bottom: 18px; }
 .timeline { padding: 5px 0; }
 .timeline > div { display: flex; gap: 12px; padding: 9px 0; position: relative; }
