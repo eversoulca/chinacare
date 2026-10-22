@@ -37,13 +37,12 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
-function Login({ onSubmit, onVerify, message, busy }: { onSubmit: (email: string) => Promise<boolean>; onVerify: (email: string, code: string) => Promise<void>; message: string; busy: boolean }) {
+function Login({ onSubmit, message, busy }: { onSubmit: (email: string, password: string) => Promise<void>; message: string; busy: boolean }) {
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
+  const [password, setPassword] = useState("");
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setCodeSent(await onSubmit(email.trim()));
+    await onSubmit(email.trim(), password);
   };
 
   return <main className="login-page">
@@ -57,16 +56,13 @@ function Login({ onSubmit, onVerify, message, busy }: { onSubmit: (email: string
       {!supabase ? <div className="crm-error" role="alert">Staff access is not configured yet. Ask the project administrator to set the public Supabase URL and key for this Vercel project.</div> : <>
         <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Invite-only access</strong>Only accounts invited and authorized by an administrator can open the inquiry inbox. Customers do not create accounts.</p></div>
         <form className="login-form" onSubmit={submit}>
-          {message && <div className={message.startsWith("We ") || message.startsWith("That code") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
+          {message && <div className={message.startsWith("We ") || message.startsWith("That password") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
           <label>Work email<input autoComplete="email" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
-          {!codeSent ? <button className="crm-primary" disabled={busy} type="submit">{busy ? "Sending…" : "Email me a sign-in code"}</button> : <>
-            <label>Email verification code<input autoComplete="one-time-code" inputMode="numeric" maxLength={8} name="code" onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))} pattern="[0-9]{6,8}" required type="text" value={code} /></label>
-            <button className="crm-primary" disabled={busy || code.length < 6} onClick={() => void onVerify(email.trim(), code)} type="button">{busy ? "Verifying…" : "Verify and sign in"}</button>
-            <button className="text-action" disabled={busy} onClick={() => { setCode(""); setCodeSent(false); }} type="button">Use a different email</button>
-          </>}
+          <label>Password<input autoComplete="current-password" name="password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
+          <button className="crm-primary" disabled={busy} type="submit">{busy ? "Signing in…" : "Sign in"}</button>
         </form>
       </>}
-      <p className="login-foot">Authorized team members only · Verification codes expire</p>
+      <p className="login-foot">Authorized team members only</p>
     </section>
     <aside className="login-aside"><div><p className="admin-kicker">PRIVATE BY DESIGN</p><blockquote>Keep every inquiry clear, considered, and in the right hands.</blockquote></div><small>For coordination only. This workspace is not a clinical record system.</small></aside>
   </main>;
@@ -334,30 +330,17 @@ export default function Admin() {
     return () => { alive = false; };
   }, [session]);
 
-  const sendLink = async (email: string) => {
-    if (!supabase) return false;
-    setBusy(true);
-    setMessage("");
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    });
-    setMessage(error ? "We could not send a sign-in code. Confirm that this email is invited and try again." : "If this email is invited, a verification code will arrive shortly.");
-    setBusy(false);
-    return !error;
-  };
-
-  const verifyCode = async (email: string, code: string) => {
+  const signIn = async (email: string, password: string) => {
     if (!supabase) return;
     setBusy(true);
     setMessage("");
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
-    setMessage(error ? "That code could not be verified. Check it and try again, or request a new code." : "Code verified. Opening the staff workspace…");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setMessage(error ? "That password could not sign you in. Check the email and password, then try again." : "Signing in…");
     setBusy(false);
   };
 
   const signOut = async () => { await supabase?.auth.signOut(); setSession(null); setRole(null); setAuthorized(false); };
   if (checking) return <div className="route-loading">Checking staff access…</div>;
-  if (!session || !authorized || !role) return <Login busy={busy} message={message} onSubmit={sendLink} onVerify={verifyCode} />;
+  if (!session || !authorized || !role) return <Login busy={busy} message={message} onSubmit={signIn} />;
   return <StaffInbox onSignOut={() => void signOut()} role={role} session={session} />;
 }
