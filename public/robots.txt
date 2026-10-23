@@ -1,14 +1,17 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Sitemap: https://eversoul.ca/sitemap.xml
 
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
+Sitemap: https://eversoul.ca/sitemap.xml
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin
+Sitemap: https://eversoul.ca/sitemap.xml
 
 User-agent: OAI-SearchBot
 Allow: /

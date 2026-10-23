@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://eversoul.ca/en/privacy-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/privacy-policy" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/terms-of-service</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/terms-of-service" />
+  </url>
+  <url><loc>https://eversoul.ca/zh/privacy-policy</loc></url>
+  <url><loc>https://eversoul.ca/zh/terms-of-service</loc></url>
+</urlset>

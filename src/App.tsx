@@ -1,5 +1,6 @@
 import { cloneElement, FormEvent, isValidElement, lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import PublicContent, { getLocalizedContentPage } from "./PublicContent";
+import LegalPage from "./LegalPages";
 import HealthScreeningPage from "./HealthScreeningPage";
 import { changeLocale, languages, localizedPath, localizeLinkClick, parseLocalizedPath, type Locale } from "./routing";
 
@@ -334,7 +335,7 @@ const initialForm: FormData = {
   language: "English", timeframe: "", contact: "Email", question: "", consent: false,
 };
 
-function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatch<React.SetStateAction<FormData>> }) {
+function InquiryForm({ form, setForm, locale }: { form: FormData; setForm: React.Dispatch<React.SetStateAction<FormData>>; locale: Locale }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [serverError, setServerError] = useState("");
@@ -415,7 +416,7 @@ function InquiryForm({ form, setForm }: { form: FormData; setForm: React.Dispatc
           <label className="full-field">General question<textarea rows={3} placeholder="Please do not include medical records, passport information, or other sensitive details." value={form.question} onChange={(e) => update("question", e.target.value)} /></label>
         </div>
       </details>
-      <label className="consent"><input checked={form.consent} type="checkbox" onChange={(e) => update("consent", e.target.checked)} /><span>I agree that my inquiry may be reviewed according to the <a href="#legal">Privacy Policy</a>. I understand this is not a medical assessment or confirmed appointment.</span></label>
+      <label className="consent"><input checked={form.consent} type="checkbox" onChange={(e) => update("consent", e.target.checked)} /><span>I agree that my inquiry may be reviewed according to the <a href={localizedPath("/privacy-policy", locale)}>Privacy Policy</a>. I understand this is not a medical assessment or confirmed appointment.</span></label>
       {errors.consent && <small className="consent-error" id="consent-error">{errors.consent}</small>}
       <button className="submit-button" disabled={status === "loading"} type="submit">{status === "loading" ? "Recording inquiry…" : "Send My Inquiry"}{status !== "loading" && <Icon name="arrow" size={18} />}</button>
       <p className="form-note"><Icon name="shield" size={14} />No payment or medical documents are needed to submit an inquiry.</p>
@@ -651,9 +652,9 @@ function PublicSite({ locale }: { locale: Locale }) {
               <h2>Tell us what you are <em>looking for.</em></h2>
               <p>Share a few basic details and our team will review your inquiry and clarify possible next steps.</p>
               <div className="privacy-note"><Icon name="shield" /><div><strong>Keep the first step simple</strong><p>We do not ask for detailed medical histories, passport numbers, records, or sensitive documents in this form.</p></div></div>
-              <div className="offices-note"><span>International presence</span><strong>Canada · Ireland · China</strong><small>Business telephone: pending provisioning and testing</small></div>
+              <div className="offices-note"><span>International presence</span><strong>Canada · Ireland · China</strong></div>
             </div>
-            <InquiryForm form={form} setForm={setForm} />
+            <InquiryForm form={form} setForm={setForm} locale={locale} />
           </div>
         </section>
 
@@ -670,12 +671,12 @@ function PublicSite({ locale }: { locale: Locale }) {
           <div className="footer-top">
             <div className="footer-brand"><a className="brand" href="#top"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><p>Explore healthcare in China, with confidence and clarity.</p></div>
             <div><h3>Services</h3><a href="/services/health-screening-in-china">Health Screening</a><a href="/services/medical-aesthetics-in-china">Medical Aesthetics</a><a href="/services/healthy-aging">Healthy Aging</a><a href="/services/rehabilitation-in-china">Rehabilitation & Recovery</a><a href="/services/tcm-integrative-care">TCM & Integrative Care</a><a href="/services/medical-travel-concierge">Travel Concierge</a></div>
-            <div><h3>Explore</h3><a href="/destinations/">Destinations</a><a href="/how-it-works">How It Works</a><a href="/resources/">Resources</a><a href="/about">About Us</a><a href="/contact">Contact</a><span className="footer-phone">Business telephone: pending provisioning and testing</span></div>
-            <div><h3>Legal</h3><a href="#legal">Privacy Policy</a><a href="#legal">Terms of Service</a><a href="#legal">Medical Information Disclaimer</a><label className="footer-language">Language<select aria-label="Choose language" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></div>
+            <div><h3>Explore</h3><a href="/destinations/">Destinations</a><a href="/how-it-works">How It Works</a><a href="/resources/">Resources</a><a href="/about">About Us</a><a href="/contact">Contact</a></div>
+            <div><h3>Legal</h3><a href={localizedPath("/privacy-policy", locale)}>Privacy Policy</a><a href={localizedPath("/terms-of-service", locale)}>Terms of Service</a><a href={localizedPath("/terms-of-service", locale)}>Medical Information Disclaimer</a><label className="footer-language">Language<select aria-label="Choose language" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></div>
           </div>
-          <div className="disclaimer"><strong>Medical information disclaimer</strong><p>China Care Guide provides healthcare information and coordination services. It is not a healthcare provider and does not diagnose or treat medical conditions. Service availability, eligibility, prices, and outcomes vary. Medical decisions should be made with qualified healthcare professionals. This service is not intended for medical emergencies.</p><small>Working brand name and legal content are editable pending professional review.</small></div>
+          <div className="disclaimer"><strong>Medical information disclaimer</strong><p>China Care Guide provides healthcare information and non-clinical coordination services. It is not a healthcare provider and does not diagnose or treat medical conditions. Service availability, eligibility, prices, and outcomes vary. Medical decisions should be made with qualified healthcare professionals. This service is not intended for medical emergencies.</p></div>
           <div className="pwa-help"><p className="eyebrow">TAKE IT WITH YOU</p><details><summary>Save China Care Guide to your home screen</summary><p>On iPhone or iPad, open this site in Safari, tap Share, then choose “Add to Home Screen.” On Android, open the browser menu and choose “Install app” or “Add to Home screen.”</p></details></div>
-          <div className="copyright"><span>© 2025 China Care Guide. Working prototype.</span><span>Canada · Ireland · China</span></div>
+          <div className="copyright"><span>© 2026 China Care Guide.</span><span>Canada · Ireland · China</span></div>
         </div>
       </footer>
       <AssistantWidget locale={locale} />
@@ -689,6 +690,8 @@ export default function App() {
   if (path === "/admin" || path.startsWith("/admin/")) return <Suspense fallback={<div className="route-loading">Loading private workspace…</div>}><Admin /></Suspense>;
   const route = parseLocalizedPath(path);
   if (!route.locale) return <LocaleRedirect />;
+  if (route.path === "/privacy-policy") return <LegalPage locale={route.locale} kind="privacy-policy" />;
+  if (route.path === "/terms-of-service") return <LegalPage locale={route.locale} kind="terms-of-service" />;
   if (route.path === "/services/health-screening-in-china") return <HealthScreeningPage locale={route.locale} />;
   const contentPage = getLocalizedContentPage(route.path, route.locale);
   if (contentPage) return <PublicContent locale={route.locale} page={contentPage} />;
