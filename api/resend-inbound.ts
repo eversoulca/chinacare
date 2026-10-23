@@ -148,7 +148,9 @@ async function processReceivedEmail(emailId: string, sender: string, recipients:
     try {
       const adminResponse = await fetch(supabaseRestUrl("staff_access?role=eq.admin&select=email"), { headers, signal: AbortSignal.timeout(6000) });
       const admins = adminResponse.ok ? await adminResponse.json() as Array<{ email?: string }> : [];
-      const recipients = [...new Set(admins.map(({ email }) => email?.trim()).filter((email): email is string => Boolean(email)))];
+      const adminEmails = admins.map(({ email }) => email?.trim()).filter((email): email is string => Boolean(email));
+      const configuredEmails = (process.env.ADMIN_NOTIFICATION_EMAIL || "").split(/[\r\n,;]+/).map((email) => email.trim()).filter(Boolean);
+      const recipients = [...new Set([...adminEmails, ...configuredEmails])];
       if (recipients.length) await fetch("https://api.resend.com/emails", {
         method: "POST", headers: { Authorization: `Bearer ${sendKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({ from, to: recipients, subject: "A new F5Bot post is ready to review", text: `A public post was added to your China Care Guide review queue:\n\n${title}\n${url}\n\nOpen https://eversoul.ca/admin. No reply was sent automatically.` }),

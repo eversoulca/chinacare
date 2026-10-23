@@ -98,8 +98,9 @@ async function sendLeadDigest(headers: Record<string, string>) {
   const leads = await pendingResponse.json() as Array<{ id: string; source_name: string; title: string; relevance_score: number; relevance_reason: string }>;
   if (!leads.length) return;
   const adminResponse = await fetch(supabaseRestUrl("staff_access?role=eq.admin&select=email"), { headers, signal: AbortSignal.timeout(7000) });
-  if (!adminResponse.ok) return;
-  const recipients = [...new Set((await adminResponse.json() as Array<{ email: string }>).map(({ email }) => email).filter(Boolean))];
+  const adminEmails = adminResponse.ok ? (await adminResponse.json() as Array<{ email: string }>).map(({ email }) => email).filter(Boolean) : [];
+  const configuredEmails = (process.env.ADMIN_NOTIFICATION_EMAIL || "").split(/[\r\n,;]+/).map((email) => email.trim()).filter(Boolean);
+  const recipients = [...new Set([...adminEmails, ...configuredEmails])];
   if (!recipients.length) return;
   const rows = leads.map((lead) => `<li><strong>${htmlEscape(lead.title)}</strong> — ${htmlEscape(lead.source_name)} · ${lead.relevance_score}/100<br><span>${htmlEscape(lead.relevance_reason)}</span></li>`).join("");
   const message = `China Care Guide has ${leads.length} public lead${leads.length === 1 ? "" : "s"} to review.`;

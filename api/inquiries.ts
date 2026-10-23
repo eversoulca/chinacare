@@ -45,6 +45,27 @@ function isOneOf(value: string, values: Set<string>) {
   return values.has(value);
 }
 
+async function notifyNewInquiry() {
+  const recipient = process.env.ADMIN_NOTIFICATION_EMAIL?.trim();
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.DISCOVERY_EMAIL_FROM;
+  if (!recipient || !apiKey || !from) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: [recipient],
+        subject: "New China Care Guide inquiry",
+        text: "A visitor submitted a new inquiry. Sign in to the private admin inbox to review it: https://eversoul.ca/admin",
+        html: '<p>A visitor submitted a new inquiry.</p><p><a href="https://eversoul.ca/admin">Open the private admin inbox</a> to review it.</p>',
+      }),
+      signal: AbortSignal.timeout(7000),
+    });
+  } catch { /* The inquiry is saved even if the optional email notification fails. */ }
+}
+
 export default async function handler(req: ApiRequest, res: ServerResponse) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -135,6 +156,7 @@ export default async function handler(req: ApiRequest, res: ServerResponse) {
     if (!response.ok) {
       return respond(res, 502, { message: "We could not send your inquiry just now. Please try again later." });
     }
+    await notifyNewInquiry();
     return respond(res, 201, { message: "Inquiry received" });
   } catch {
     return respond(res, 400, { message: "Please check the form and try again." });
