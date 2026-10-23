@@ -559,6 +559,28 @@ footer { background: #202d3d; color: white; padding: 76px 24px 30px; }
 .social-draft-head small { color: var(--crm-muted); font-size: .6rem; }
 .social-draft-copy { color: var(--crm-text); font-size: .88rem; line-height: 1.65; margin: 17px 0; white-space: pre-wrap; }
 .social-draft-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
+.discovery-section { margin: 0 0 32px; }
+.discovery-section > .card-heading { align-items: center; }
+.discovery-intro { color: var(--crm-muted); font-size: .78rem; line-height: 1.6; margin: -8px 0 16px; }
+.discovery-import { margin: 0 0 14px; padding: 16px 20px; }
+.discovery-import summary { cursor: pointer; font-size: .8rem; font-weight: 650; }
+.discovery-import > p { color: var(--crm-muted); font-size: .72rem; }
+.discovery-import form { display: grid; gap: 12px; }
+.discovery-import form label { color: var(--crm-muted); display: grid; font-size: .68rem; font-weight: 600; gap: 6px; }
+.discovery-import input, .discovery-import textarea { background: white; border: 1px solid var(--crm-line); border-radius: 5px; color: var(--crm-text); font: inherit; min-height: 40px; padding: 8px 10px; width: 100%; }
+.discovery-import textarea { resize: vertical; }
+.discovery-import form button { justify-self: start; }
+.discovery-item { margin-bottom: 12px; padding: 18px 20px; }
+.discovery-item .social-draft-head { align-items: center; }
+.discovery-item .social-draft-head select { background: white; border: 1px solid var(--crm-line); color: var(--crm-text); min-height: 36px; padding: 6px 9px; }
+.discovery-item h3 { color: var(--crm-text); font-size: .95rem; line-height: 1.4; margin: 16px 0 8px; }
+.discovery-item > p { color: var(--crm-muted); font-size: .78rem; line-height: 1.65; white-space: pre-wrap; }
+.discovery-reason { color: var(--crm-muted); display: block; font-size: .68rem; line-height: 1.55; }
+.discovery-reply { background: #f7f8f5; border-left: 3px solid var(--crm-teal); margin: 14px 0; padding: 12px 14px; }
+.discovery-reply strong { font-size: .7rem; }
+.discovery-reply p { color: var(--crm-text); font-size: .78rem; line-height: 1.55; white-space: pre-wrap; }
+.discovery-item > a { color: var(--crm-teal); font-size: .75rem; font-weight: 600; text-decoration: none; }
+@media (max-width: 600px) { .discovery-item .social-draft-head { align-items: flex-start; flex-direction: column; } .discovery-item .social-draft-head select { align-self: flex-start; } }
 .social-open-x { text-decoration: none; }
 .x-connect-card { align-items: center; display: flex; justify-content: space-between; margin: 0 0 18px; padding: 18px 20px; }
 .x-connect-card .admin-kicker { margin: 0 0 5px; }

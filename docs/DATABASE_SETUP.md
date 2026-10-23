@@ -15,11 +15,11 @@ The server endpoint uses the existing `SUPABASE_URL` and `SUPABASE_ANON_KEY` env
 
 The `/admin` area is a private inquiry inbox, not a full CRM. It reads real inquiries and allows status updates for authorized staff. It does not yet send acknowledgments, provide in-app user management, store an audit trail, or support provider records, quotes, and tasks.
 
-## Social content review queue
+## Social content review queue and public-source discovery
 
-The `/admin` workspace includes a private X content queue. Run `supabase/migrations/20261024000000_social_drafts.sql` and then `supabase/migrations/20261025000000_x_publishing.sql` in the project's SQL Editor. The first creates the RLS-protected `social_drafts` table; the second adds publishing metadata and a private X connection table. Admins and coordinators can request a model draft, review it, and publish an approved draft with a separate confirmation; read-only staff can view drafts. An uncertain X response locks that draft to prevent a duplicate post.
+The `/admin` workspace includes an educational-post draft queue and a public-source discovery queue. Run `supabase/migrations/20261024000000_social_drafts.sql` and `supabase/migrations/20261026000000_social_discovery.sql` in the project's SQL Editor. The first creates the RLS-protected `social_drafts` table; the second creates the staff-only `social_discovery_leads` review queue. Admins and coordinators can scan sources, import F5Bot alerts, review relevance, and copy an AI reply suggestion. Nothing is published automatically. X API publishing is no longer part of the active workflow; approved educational posts can be copied into a platform for manual publication.
 
-In the Vercel `chinacare` project, add `SILICONFLOW_API_KEY` (the replacement key created after rotating any exposed key), `SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1`, and `SILICONFLOW_MODEL=deepseek-ai/DeepSeek-V3` as server-only environment variables. Never use `VITE_` for these variables. The generation endpoint verifies the Supabase staff session and editor role before making one model request and saving the result. Each generation can incur SiliconFlow usage charges.
+In the Vercel `chinacare` project, configure server-only `SILICONFLOW_API_KEY`, `SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1`, and `SILICONFLOW_MODEL=deepseek-ai/DeepSeek-V3`. For source scans, also configure `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`, and optional `DISCOVERY_RSS_FEEDS` / `YOUTUBE_API_KEY`. Never use `VITE_` for these variables. A daily scan is capped and one model request classifies up to 20 new excerpts; usage can incur SiliconFlow charges. F5Bot alerts are imported by pasting the public URL and excerpt in the admin page.
 
 ## Public AI assistant
 
@@ -27,9 +27,7 @@ The public chat uses `/api/assistant-chat` and the same server-only SiliconFlow 
 
 The assistant must not diagnose, assess suitability, interpret test results, prescribe, guarantee outcomes, invent prices/providers/availability, or give personal medical, immigration, legal, or financial advice. Emergency and likely personal-clinical questions are answered with a fixed safety message and are not sent to the model. The application does not write chat messages to Supabase; ordinary questions are sent to SiliconFlow to generate an answer, so visitors are told not to share sensitive information. The API limits each function instance to 12 requests per 10 minutes and caps answer length. This per-instance throttle is a basic abuse guard, not a global spend cap; set provider-side usage limits and check usage before public promotion.
 
-For X OAuth and one-click publishing, add server-only `X_CLIENT_ID`, `X_CLIENT_SECRET`, `X_OAUTH_STATE_SECRET` (random, at least 32 characters), `X_TOKEN_ENCRYPTION_KEY` (base64 encoding of 32 random bytes), `X_EXPECTED_USERNAME=iecnvan`, and `SUPABASE_SERVICE_ROLE_KEY`. Do not put any of these under `VITE_` names or send secrets through chat. In the X Developer Console, create a confidential Web App, enable OAuth 2.0, set the callback URL exactly to `https://eversoul.ca/api/x-callback`, and request only `tweet.read`, `tweet.write`, `users.read`, and `offline.access`. The website URL is `https://eversoul.ca`. Add the Client ID and Client Secret directly to Vercel, not this repository. X tokens are encrypted before storage and the connection table is inaccessible to browser roles. The account must match `@iecnvan`.
-
-Publishing is never scheduled automatically: an editor approves the draft, clicks **Publish to X**, and confirms the action. X currently lists Post Create at $0.015 per request; confirm current rates and API credit balance in the X Developer Console before publishing.
+The old X OAuth endpoints and database migration remain for compatibility, but the admin no longer connects X or publishes through the X API. This avoids X API charges in the current workflow. Editors can copy an approved educational draft and post it manually.
 
 ## Enable staff access
 

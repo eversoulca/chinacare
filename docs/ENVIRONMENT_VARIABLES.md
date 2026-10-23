@@ -40,6 +40,17 @@ SiliconFlow model gateway configuration for server-side draft generation:
 | `SILICONFLOW_BASE_URL` | OpenAI-compatible API origin, normally `https://api.siliconflow.cn/v1` | Server only |
 | `SILICONFLOW_MODEL` | Selected model ID, initially `deepseek-ai/DeepSeek-V3` | Server only |
 
+Public-source discovery (the daily job is optional until configured):
+
+| Variable | Purpose | Exposure |
+| --- | --- | --- |
+| `DISCOVERY_RSS_FEEDS` | Newline-separated Google Alerts RSS feed URLs and other permitted public RSS feeds; maximum 8 feeds are read per scan | Server only; feed URLs may contain private feed tokens |
+| `YOUTUBE_API_KEY` | YouTube Data API v3 key for recent video search and a small number of public video comments | Server only; restrict to YouTube Data API v3 in Google Cloud |
+| `SUPABASE_SERVICE_ROLE_KEY` | Saves discovered public excerpts from the server-side scan into the staff-only review queue | Server only; never expose in `VITE_*` |
+| `CRON_SECRET` | Authorizes the scheduled scan endpoint | Server only |
+
+Discovery runs once daily at 13:00 UTC. Each scan caps RSS at 8 feeds / 8 items per feed, YouTube at 3 search calls and up to 6 comment calls, and saves no more than 30 new items. If SiliconFlow is configured, one bounded model request ranks and drafts replies for up to 20 new items. No reply is sent or post published automatically. F5Bot alerts arrive by email and can be pasted into the admin import form; automatic email ingestion is not configured.
+
 Do not configure an automatic model fallback until the primary model is tested and a monthly spending cap is set; retries can create extra billable requests. Revoke any API key that has been pasted into a chat or otherwise exposed, then create a replacement directly in the provider console.
 
 X OAuth and publishing configuration (only needed after creating an X Developer App and applying the social-drafts and X-publishing migrations):

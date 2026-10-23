@@ -3,7 +3,8 @@
   "crons": [
     { "path": "/api/supabase-keepalive", "schedule": "0 2 * * *" },
     { "path": "/api/supabase-keepalive", "schedule": "0 10 * * *" },
-    { "path": "/api/supabase-keepalive", "schedule": "0 18 * * *" }
+    { "path": "/api/supabase-keepalive", "schedule": "0 18 * * *" },
+    { "path": "/api/discover-leads", "schedule": "0 13 * * *" }
   ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
