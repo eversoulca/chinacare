@@ -561,6 +561,7 @@ footer { background: #202d3d; color: white; padding: 76px 24px 30px; }
 .social-draft-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
 .discovery-section { margin: 0 0 32px; }
 .discovery-section > .card-heading { align-items: center; }
+.discovery-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .discovery-intro { color: var(--crm-muted); font-size: .78rem; line-height: 1.6; margin: -8px 0 16px; }
 .discovery-import { margin: 0 0 14px; padding: 16px 20px; }
 .discovery-import summary { cursor: pointer; font-size: .8rem; font-weight: 650; }

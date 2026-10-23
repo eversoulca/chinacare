@@ -200,7 +200,13 @@ async function runDiscovery(res: ServerResponse) {
     }
   }
   await sendLeadDigest(headers);
-  return json(res, 200, { found: rows.length, classified: scores.length, message: rows.length ? `Saved ${rows.length} new public items for review.` : "No new items since the last scan." });
+  const lowRelevance = scores.filter((score) => score.score < 60).length;
+  const message = !rows.length
+    ? "No new items since the last scan."
+    : lowRelevance === rows.length
+      ? `Saved ${rows.length} new item${rows.length === 1 ? "" : "s"}; AI scored ${rows.length === 1 ? "it" : "all of them"} below 60, so ${rows.length === 1 ? "it is" : "they are"} hidden by default. Choose Show low relevance to inspect.`
+      : `Saved ${rows.length} new public item${rows.length === 1 ? "" : "s"} for review.`;
+  return json(res, 200, { found: rows.length, classified: scores.length, message });
 }
 
 async function importF5Bot(body: Record<string, unknown>, res: ServerResponse) {

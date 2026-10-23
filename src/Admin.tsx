@@ -209,12 +209,14 @@ function DiscoveryQueue({ session, canEdit }: { session: Session; canEdit: boole
   const [leads, setLeads] = useState<DiscoveryLead[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [showLowRelevance, setShowLowRelevance] = useState(false);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [excerpt, setExcerpt] = useState("");
-  const load = async () => {
+  const load = async (includeLowRelevance = showLowRelevance) => {
     if (!supabase) return;
-    const { data, error } = await supabase.from("social_discovery_leads").select("id,created_at,source,source_name,url,title,excerpt,author,published_at,relevance_score,relevance_reason,reply_draft,status,reply_decision").or("relevance_score.gte.60,relevance_score.is.null").order("created_at", { ascending: false }).limit(100);
+    const query = supabase.from("social_discovery_leads").select("id,created_at,source,source_name,url,title,excerpt,author,published_at,relevance_score,relevance_reason,reply_draft,status,reply_decision");
+    const { data, error } = await (includeLowRelevance ? query : query.or("relevance_score.gte.60,relevance_score.is.null")).order("created_at", { ascending: false }).limit(100);
     if (error) setMessage("Could not load the discovery queue. Apply the social discovery migration first.");
     else setLeads((data ?? []) as DiscoveryLead[]);
   };
@@ -256,7 +258,7 @@ function DiscoveryQueue({ session, canEdit }: { session: Session; canEdit: boole
     if (saved) setMessage(decision === "approved" ? `${copied ? "Reply approved and copied." : "Reply approved."} Open the original post and publish it there when ready.` : "Marked no reply. Nothing was sent.");
   };
   return <section className="discovery-section">
-    <div className="card-heading"><div><p className="admin-kicker">PUBLIC WEB LISTENING</p><h2>Potential questions</h2></div><button className="crm-secondary" disabled={busy || !canEdit} onClick={() => void scan()} type="button">{busy ? "Scanning…" : "Scan sources now"}</button></div>
+    <div className="card-heading"><div><p className="admin-kicker">PUBLIC WEB LISTENING</p><h2>Potential questions</h2></div><div className="discovery-actions"><button className="crm-secondary" onClick={() => { const next = !showLowRelevance; setShowLowRelevance(next); void load(next); }} type="button">{showLowRelevance ? "Hide low relevance" : "Show low relevance"}</button><button className="crm-secondary" disabled={busy || !canEdit} onClick={() => void scan()} type="button">{busy ? "Scanning…" : "Scan sources now"}</button></div></div>
     <p className="discovery-intro">Relevant items are emailed to the staff admin. Approve to copy a reply, or choose no reply. You still publish in the original platform; nothing is sent automatically.</p>
     {message && <div className={message.startsWith("Could") || message.includes("failed") || message.includes("unavailable") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
     {canEdit && <details className="crm-card discovery-import"><summary>Import an alert from F5Bot</summary><p>F5Bot sends alerts by email; paste a relevant public link and excerpt here for AI review.</p><form onSubmit={(event) => void importAlert(event)}><label>Post title<input maxLength={300} onChange={(event) => setTitle(event.target.value)} required value={title} /></label><label>Public post URL<input maxLength={1000} onChange={(event) => setUrl(event.target.value)} required type="url" value={url} /></label><label>Short excerpt<textarea maxLength={1200} onChange={(event) => setExcerpt(event.target.value)} required rows={3} value={excerpt} /></label><button className="crm-secondary" disabled={busy} type="submit">Add alert</button></form></details>}
