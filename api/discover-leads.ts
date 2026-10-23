@@ -1,5 +1,68 @@
 import type { ServerResponse } from "node:http";
-import { json, readBody, sameOrigin, serviceHeaders, staffFromRequest, supabaseRestUrl, type Request } from "../lib/x-shared";
+import type { IncomingMessage } from "node:http";
+
+type Request = IncomingMessage & { method?: string; body?: unknown };
+type Staff = { id: string; role: "admin" | "coordinator" | "read_only" };
+
+function json(res: ServerResponse, status: number, data: Record<string, unknown>) {
+  res.statusCode = status;
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.end(JSON.stringify(data));
+}
+
+function sameOrigin(req: Request) {
+  try {
+    if (!req.headers.host) return false;
+    const source = typeof req.headers.origin === "string" ? req.headers.origin : req.headers.referer;
+    return typeof source === "string" && new URL(source).host === req.headers.host;
+  } catch { return false; }
+}
+
+async function staffFromRequest(req: Request, editorsOnly = true): Promise<Staff | null> {
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  const authorization = req.headers.authorization;
+  if (!supabaseUrl || !supabaseKey || !authorization?.startsWith("Bearer ") || authorization.length > 4096) return null;
+  const headers = { apikey: supabaseKey, Authorization: authorization };
+  const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, { headers, signal: AbortSignal.timeout(7000) });
+  if (!userResponse.ok) return null;
+  const user = await userResponse.json() as { id?: string };
+  if (!user.id) return null;
+  const response = await fetch(`${supabaseUrl}/rest/v1/staff_access?user_id=eq.${encodeURIComponent(user.id)}&select=role`, { headers, signal: AbortSignal.timeout(7000) });
+  if (!response.ok) return null;
+  const rows = await response.json() as Array<{ role?: string }>;
+  const role = rows[0]?.role;
+  if (!role || !["admin", "coordinator", "read_only"].includes(role)) return null;
+  if (editorsOnly && !["admin", "coordinator"].includes(role)) return null;
+  return { id: user.id, role: role as Staff["role"] };
+}
+
+async function readBody(req: Request) {
+  if (req.body && typeof req.body === "object") return req.body as Record<string, unknown>;
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size > 2000) throw new Error("Request too large");
+    chunks.push(buffer);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as Record<string, unknown>;
+}
+
+function serviceHeaders() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("Supabase service role key is not configured");
+  return { apikey: key, Authorization: `Bearer ${key}` };
+}
+
+function supabaseRestUrl(path: string) {
+  const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  if (!url) throw new Error("Supabase URL is not configured");
+  return `${url}/rest/v1/${path}`;
+}
 
 type Lead = { source: "rss" | "youtube_video" | "youtube_comment" | "f5bot"; source_name: string; external_id: string; url: string; title: string; excerpt: string; author: string; published_at: string | null };
 const MAX_RSS_FEEDS = 8;
