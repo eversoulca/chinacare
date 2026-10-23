@@ -100,8 +100,9 @@ h2 em, h1 em { color: var(--forest); font-weight: 400; }
 .section-heading.center > p:last-child { margin-left: auto; margin-right: auto; }
 .services-section { background: var(--cream); }
 .services-grid { display: grid; gap: 24px; grid-template-columns: repeat(2, 1fr); }
-.service-card { background: white; border: 1px solid var(--line); display: grid; grid-template-columns: .9fr 1.1fr; min-height: 350px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+.service-card { background: white; border: 1px solid var(--line); color: inherit; display: grid; grid-template-columns: .9fr 1.1fr; min-height: 350px; overflow: hidden; text-decoration: none; transition: border-color .2s, box-shadow .2s; }
 .service-card:hover { border-color: #c3cbd4; box-shadow: 0 12px 32px rgba(32, 45, 61, 0.08); }
+.service-card:focus-visible, .additional-service-card:focus-visible { outline: 3px solid var(--forest); outline-offset: 4px; }
 .service-card.featured { min-height: 440px; }
 .service-image { overflow: hidden; position: relative; }
 .service-image img { height: 100%; object-fit: cover; width: 100%; }
@@ -113,7 +114,7 @@ h2 em, h1 em { color: var(--forest); font-weight: 400; }
 .service-copy ul, .dental-service ul { display: grid; gap: 7px; list-style: none; margin: 2px 0 25px; padding: 0; }
 .service-copy li, .dental-service li { align-items: center; color: #525d69; display: flex; font-size: .7rem; gap: 8px; }
 .service-copy li svg, .dental-service li svg { color: var(--forest); flex-shrink: 0; }
-.service-copy a, .additional-services a, .destination-card a { align-items: center; color: var(--forest); display: inline-flex; font-size: .77rem; font-weight: 600; gap: 11px; margin-top: auto; }
+.service-card-cta, .destination-card a { align-items: center; color: var(--forest); display: inline-flex; font-size: .77rem; font-weight: 600; gap: 11px; margin-top: auto; }
 .additional-services { display: grid; gap: 24px; grid-template-columns: repeat(2, 1fr); margin-top: 24px; }
 .additional-service-card { background: var(--sage-pale); color: inherit; display: flex; flex-direction: column; min-width: 0; overflow: hidden; text-decoration: none; transition: box-shadow .2s, transform .2s; }
 .additional-service-card:hover { box-shadow: 0 14px 34px rgba(32, 45, 61, 0.12); transform: translateY(-3px); }

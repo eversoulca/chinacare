@@ -164,7 +164,7 @@ function ServiceCard({ service, onSelect }: { service: typeof services[number]; 
     tcm: "/services/tcm-integrative-care",
   };
   return (
-    <article className={`service-card ${service.featured ? "featured" : ""}`} id={service.id}>
+    <a className={`service-card ${service.featured ? "featured" : ""}`} href={routes[service.id]} id={service.id} onClick={() => onSelect(service.value)}>
       <div className="service-image">
         <img alt={`${service.title} consultation`} src={service.image} />
         <span>{service.eyebrow}</span>
@@ -173,9 +173,9 @@ function ServiceCard({ service, onSelect }: { service: typeof services[number]; 
         <h3>{service.title}</h3>
         <p>{service.text}</p>
         <ul>{service.details.map((detail) => <li key={detail}><Icon name="check" size={14} />{detail}</li>)}</ul>
-        <a href={routes[service.id]} onClick={() => onSelect(service.value)}>{service.cta}<Icon name="arrow" size={18} /></a>
+        <span className="service-card-cta">{service.cta}<Icon name="arrow" size={18} /></span>
       </div>
-    </article>
+    </a>
   );
 }
 
