@@ -2,6 +2,7 @@ import { cloneElement, FormEvent, isValidElement, lazy, ReactNode, Suspense, use
 import PublicContent, { getLocalizedContentPage } from "./PublicContent";
 import LegalPage from "./LegalPages";
 import HealthScreeningPage from "./HealthScreeningPage";
+import AestheticCarePage from "./AestheticCarePages";
 import { changeLocale, languages, localizedPath, localizeLinkClick, parseLocalizedPath, type Locale } from "./routing";
 
 const Admin = lazy(() => import("./Admin"));
@@ -692,6 +693,8 @@ export default function App() {
   if (!route.locale) return <LocaleRedirect />;
   if (route.path === "/privacy-policy") return <LegalPage locale={route.locale} kind="privacy-policy" />;
   if (route.path === "/terms-of-service") return <LegalPage locale={route.locale} kind="terms-of-service" />;
+  if (route.path === "/services/medical-aesthetics-in-china") return <AestheticCarePage locale={route.locale} kind="medical-aesthetics-in-china" />;
+  if (route.path === "/services/healthy-aging") return <AestheticCarePage locale={route.locale} kind="healthy-aging" />;
   if (route.path === "/services/health-screening-in-china") return <HealthScreeningPage locale={route.locale} />;
   const contentPage = getLocalizedContentPage(route.path, route.locale);
   if (contentPage) return <PublicContent locale={route.locale} page={contentPage} />;

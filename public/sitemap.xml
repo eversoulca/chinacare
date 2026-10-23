@@ -12,6 +12,20 @@
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/terms-of-service" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/terms-of-service" />
   </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/medical-aesthetics-in-china</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/medical-aesthetics-in-china" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/healthy-aging</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/healthy-aging" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/healthy-aging" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/healthy-aging" />
+  </url>
   <url><loc>https://eversoul.ca/zh/privacy-policy</loc></url>
   <url><loc>https://eversoul.ca/zh/terms-of-service</loc></url>
+  <url><loc>https://eversoul.ca/zh/services/medical-aesthetics-in-china</loc></url>
+  <url><loc>https://eversoul.ca/zh/services/healthy-aging</loc></url>
 </urlset>
