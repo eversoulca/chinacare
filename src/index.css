@@ -114,11 +114,15 @@ h2 em, h1 em { color: var(--forest); font-weight: 400; }
 .service-copy li, .dental-service li { align-items: center; color: #525d69; display: flex; font-size: .7rem; gap: 8px; }
 .service-copy li svg, .dental-service li svg { color: var(--forest); flex-shrink: 0; }
 .service-copy a, .additional-services a, .destination-card a { align-items: center; color: var(--forest); display: inline-flex; font-size: .77rem; font-weight: 600; gap: 11px; margin-top: auto; }
-.additional-services { background: var(--sage-pale); display: grid; grid-template-columns: repeat(2, 1fr); margin-top: 24px; }
-.additional-services > div { padding: 42px; }
-.additional-services > div + div { border-left: 1px solid #d4d8df; }
+.additional-services { display: grid; gap: 24px; grid-template-columns: repeat(2, 1fr); margin-top: 24px; }
+.additional-service-card { background: var(--sage-pale); color: inherit; display: flex; flex-direction: column; min-width: 0; overflow: hidden; text-decoration: none; transition: box-shadow .2s, transform .2s; }
+.additional-service-card:hover { box-shadow: 0 14px 34px rgba(32, 45, 61, 0.12); transform: translateY(-3px); }
+.additional-service-card:focus-visible { outline: 3px solid var(--forest); outline-offset: 4px; }
+.additional-service-card > img { aspect-ratio: 2.25 / 1; object-fit: cover; width: 100%; }
+.additional-service-copy { align-items: flex-start; display: flex; flex: 1; flex-direction: column; padding: 34px 38px 38px; }
 .additional-services span { color: var(--forest); font-size: .64rem; font-weight: 600; letter-spacing: .17em; }
 .additional-services p { max-width: 460px; }
+.additional-service-cta { align-items: center; color: var(--forest); display: inline-flex; font-size: .77rem; font-weight: 600; gap: 11px; margin-top: auto; padding-top: 22px; }
 
 .principles { background: white; }
 .principle-grid { border-bottom: 1px solid var(--line); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -352,8 +356,7 @@ footer { background: #202d3d; color: white; padding: 76px 24px 30px; }
   .service-card, .service-card.featured { min-height: auto; }
   .service-card .service-image { height: 235px; }
   .service-copy { min-height: 300px; padding: 30px; }
-  .additional-services > div { padding: 32px 28px; }
-  .additional-services > div + div { border-left: 0; border-top: 1px solid #d4d8df; }
+  .additional-service-copy { padding: 28px; }
   .principle-grid { grid-template-columns: 1fr; }
   .principle-grid article { border-bottom: 1px solid var(--line); border-right: 0; padding: 28px 4px !important; }
   .principle-grid article:nth-child(n+3) { border-top: 0; }

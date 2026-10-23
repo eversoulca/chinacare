@@ -49,6 +49,8 @@ const images = {
   aesthetics: "https://images.unsplash.com/photo-1713085085470-fba013d67e65?auto=format&fit=crop&w=1200&q=85",
   recovery: "https://images.unsplash.com/photo-1645005513713-9e2b92a687d3?auto=format&fit=crop&w=1200&q=85",
   tcm: "https://images.unsplash.com/photo-1598555763574-dca77e10427e?auto=format&fit=crop&w=1200&q=85",
+  specialist: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=85",
+  dental: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1200&q=85",
 };
 
 const services = [
@@ -510,8 +512,14 @@ function PublicSite({ locale }: { locale: Locale }) {
             <SectionHeading eyebrow="WAYS WE CAN HELP" title="Start with the care you are exploring." text="Health screening is our primary starting point, supported by responsible coordination across selected healthcare services." />
             <div className="services-grid">{services.map((service) => <ServiceCard key={service.id} service={service} onSelect={selectService} />)}</div>
             <div className="additional-services" id="additional">
-              <div><span>ADDITIONAL SERVICE</span><h3>Specialist & Surgical Care</h3><p>Explore selected consultations and planned care, subject to assessment, provider availability, and applicable requirements.</p><a href="/services/specialist-surgical-care" onClick={() => selectService("Specialist & Surgical Care")}>Explore Planned Care <Icon name="arrow" size={18} /></a></div>
-              <div className="dental-service"><span>ADDITIONAL SERVICE</span><h3>Dental Care</h3><p>Ask about dental consultations, restorative care, crowns, bridges, or implants where provider availability is confirmed.</p><ul><li><Icon name="check" size={14} />Likely number of visits</li><li><Icon name="check" size={14} />Multi-trip and follow-up considerations</li></ul><a href="/services/dental-care" onClick={() => selectService("Dental Care")}>Explore Dental Care <Icon name="arrow" size={18} /></a></div>
+              <a className="additional-service-card" href="/services/specialist-surgical-care" onClick={() => selectService("Specialist & Surgical Care")}>
+                <img src={images.specialist} alt="Medical specialist discussing care with a patient" loading="lazy" />
+                <div className="additional-service-copy"><span>ADDITIONAL SERVICE</span><h3>Specialist & Surgical Care</h3><p>Explore selected consultations and planned care, subject to assessment, provider availability, and applicable requirements.</p><span className="additional-service-cta">Explore Planned Care <Icon name="arrow" size={18} /></span></div>
+              </a>
+              <a className="additional-service-card dental-service" href="/services/dental-care" onClick={() => selectService("Dental Care")}>
+                <img src={images.dental} alt="Dentist providing a patient consultation" loading="lazy" />
+                <div className="additional-service-copy"><span>ADDITIONAL SERVICE</span><h3>Dental Care</h3><p>Ask about dental consultations, restorative care, crowns, bridges, or implants where provider availability is confirmed.</p><ul><li><Icon name="check" size={14} />Likely number of visits</li><li><Icon name="check" size={14} />Multi-trip and follow-up considerations</li></ul><span className="additional-service-cta">Explore Dental Care <Icon name="arrow" size={18} /></span></div>
+              </a>
             </div>
           </div>
         </section>
