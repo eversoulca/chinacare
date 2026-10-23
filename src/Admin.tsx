@@ -18,6 +18,10 @@ type Inquiry = {
   status: InquiryStatus;
 };
 type SocialDraft = { id: string; created_at: string; topic: string; content: string; status: "draft" | "approved" | "rejected" | "publishing" | "published"; model: string; published_post_id?: string | null };
+const socialPlatform = (draft: SocialDraft) => {
+  const match = draft.topic.match(/^(X|Facebook|Instagram): (.+)$/);
+  return { platform: match?.[1] || "X", topic: match?.[2] || draft.topic };
+};
 
 const statusOptions: { value: InquiryStatus; label: string }[] = [
   { value: "new", label: "New" },
@@ -352,9 +356,9 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ topic }),
       });
-      const result = await response.json() as { draft?: SocialDraft; message?: string };
-      if (!response.ok || !result.draft) setMessage(result.message || "Draft generation failed.");
-      else { setDrafts((current) => [result.draft!, ...current]); setMessage("Draft created. Review it before posting."); }
+      const result = await response.json() as { drafts?: SocialDraft[]; message?: string };
+      if (!response.ok || !result.drafts?.length) setMessage(result.message || "Draft generation failed.");
+      else { setDrafts((current) => [...result.drafts!, ...current]); setMessage("Three adapted drafts created. Review each one, then copy and publish manually."); }
     } catch { setMessage("Draft generation is temporarily unavailable."); }
     setBusy(false);
   };
@@ -363,12 +367,12 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
     if (!supabase || !canEdit) return;
     const { error } = await supabase.from("social_drafts").update({ status, reviewed_by: session.user.id, reviewed_at: new Date().toISOString() }).eq("id", draft.id);
     if (error) setMessage("Could not update this draft. Check that the social drafts migration is installed.");
-    else { setDrafts((items) => items.map((item) => item.id === draft.id ? { ...item, status } : item)); setMessage(status === "approved" ? "Marked approved. You can now copy it to X." : "Draft rejected."); }
+    else { setDrafts((items) => items.map((item) => item.id === draft.id ? { ...item, status } : item)); setMessage(status === "approved" ? `Marked approved. You can now copy it for ${socialPlatform(draft).platform}.` : "Draft rejected."); }
   };
 
-  const copyDraft = async (content: string) => {
+  const copyDraft = async (content: string, platform: string) => {
     await navigator.clipboard.writeText(content);
-    setMessage("Copied. Review and publish manually in X.");
+    setMessage(`Copied. Review and publish manually on ${platform}.`);
   };
 
   return <main className="crm-main">
@@ -376,8 +380,8 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
     <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Human review required</strong>Drafts are saved for review and are never published automatically. Do not use this tool for personal health details or clinical advice.</p></div>
     <DiscoveryQueue session={session} canEdit={canEdit} />
     {message && <div className={message.startsWith("Could") || message.includes("failed") || message.includes("unavailable") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
-    {canEdit && <section className="crm-card social-generate"><div className="card-heading"><div><p className="admin-kicker">NEW DRAFT</p><h2>Generate an educational post</h2></div></div><div className="social-controls"><label htmlFor="social-topic">Choose an approved topic</label><select id="social-topic" onChange={(event) => setTopic(event.target.value)} value={topic}>{socialTopicGroups.map((group) => <optgroup key={group.label} label={group.label}>{group.topics.map((item) => <option key={item}>{item}</option>)}</optgroup>)}</select><button className="crm-primary" disabled={busy} onClick={() => void generate()} type="button">{busy ? "Generating…" : "Generate draft"}</button></div><p className="social-note">Posts are written for international readers planning care in China. Policy and hospital-system topics use official sources; each click makes one billable model request.</p></section>}
-    <section className="social-drafts"><div className="card-heading"><div><p className="admin-kicker">REVIEW QUEUE</p><h2>Educational post drafts</h2></div></div>{loading ? <p className="inquiry-empty">Loading drafts…</p> : drafts.length ? drafts.map((draft) => <article className="crm-card social-draft" key={draft.id}><div className="social-draft-head"><div><p className="admin-kicker">{draft.topic}</p><small>{formatDate(draft.created_at)} · {draft.model}</small></div><span className={`crm-status ${draft.status === "approved" || draft.status === "published" ? "green" : draft.status === "rejected" ? "red" : "blue"}`}>{draft.status}</span></div><p className="social-draft-copy">{draft.content}</p><div className="social-draft-actions">{canEdit && draft.status === "draft" && <><button className="crm-secondary" onClick={() => void review(draft, "rejected")} type="button">Reject</button><button className="crm-secondary" onClick={() => void review(draft, "approved")} type="button">Approve</button></>}{draft.status === "approved" && <><button className="crm-secondary" onClick={() => void copyDraft(draft.content)} type="button">Copy post</button><a className="crm-secondary social-open-x" href="https://x.com/compose/post" rel="noreferrer" target="_blank">Open X to post manually</a></>}</div></article>) : <div className="crm-card"><p className="inquiry-empty">No drafts yet. Choose a topic above to create the first one.</p></div>}</section>
+    {canEdit && <section className="crm-card social-generate"><div className="card-heading"><div><p className="admin-kicker">NEW DRAFT SET</p><h2>Generate posts for three platforms</h2></div></div><div className="social-controls"><label htmlFor="social-topic">Choose an approved topic</label><select id="social-topic" onChange={(event) => setTopic(event.target.value)} value={topic}>{socialTopicGroups.map((group) => <optgroup key={group.label} label={group.label}>{group.topics.map((item) => <option key={item}>{item}</option>)}</optgroup>)}</select><button className="crm-primary" disabled={busy} onClick={() => void generate()} type="button">{busy ? "Generating…" : "Generate X + Facebook + Instagram drafts"}</button></div><p className="social-note">One model request creates three separately adapted drafts. Review and publish each manually. Policy and hospital-system topics use official sources where available.</p></section>}
+    <section className="social-drafts"><div className="card-heading"><div><p className="admin-kicker">REVIEW QUEUE</p><h2>Educational post drafts</h2></div></div>{loading ? <p className="inquiry-empty">Loading drafts…</p> : drafts.length ? drafts.map((draft) => { const { platform, topic: displayTopic } = socialPlatform(draft); const platformUrl = platform === "Facebook" ? "https://www.facebook.com/" : platform === "Instagram" ? "https://www.instagram.com/" : "https://x.com/compose/post"; return <article className="crm-card social-draft" key={draft.id}><div className="social-draft-head"><div><p className="admin-kicker">{platform} · {displayTopic}</p><small>{formatDate(draft.created_at)} · {draft.model}</small></div><span className={`crm-status ${draft.status === "approved" || draft.status === "published" ? "green" : draft.status === "rejected" ? "red" : "blue"}`}>{draft.status}</span></div><p className="social-draft-copy">{draft.content}</p><div className="social-draft-actions">{canEdit && draft.status === "draft" && <><button className="crm-secondary" onClick={() => void review(draft, "rejected")} type="button">Reject</button><button className="crm-secondary" onClick={() => void review(draft, "approved")} type="button">Approve</button></>}{draft.status === "approved" && <><button className="crm-secondary" onClick={() => void copyDraft(draft.content, platform)} type="button">Copy {platform} post</button><a className="crm-secondary" href={platformUrl} rel="noreferrer" target="_blank">Open {platform} to post manually</a></>}</div></article>; }) : <div className="crm-card"><p className="inquiry-empty">No drafts yet. Choose a topic above to create the first set.</p></div>}</section>
   </main>;
 }
 

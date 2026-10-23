@@ -137,28 +137,36 @@ export default async function handler(req: ApiRequest, res: ServerResponse) {
       body: JSON.stringify({
         model,
         temperature: 0.75,
-        max_tokens: 260,
+        max_tokens: 1400,
         messages: [
-          { role: "system", content: "You are the English-language editorial writer for China Care Guide, a small coordination guide for international people exploring planned healthcare in China. Write one short, specific, genuinely useful X post (maximum 260 characters including spaces). Speak to the selected topic and the real planning concern behind it. Give one concrete question to ask or one practical distinction the reader can use. This is an educational post, not a generic healthcare slogan or advertisement. Do not claim China's care is universally cheaper, faster, better, safer, or more experienced. Do not give medical advice, assess suitability, diagnose, recommend tests or treatment, name providers, invent prices, statistics, availability, partnerships, patient stories, or outcomes. Frame clinical and preparation details as questions for the treating provider. Never imply a pilot or city policy applies across China. When an official source note is supplied, use only its narrow facts, preserve the date and location, and include its official URL if the post makes a policy or classification claim. Never invent or reproduce a foreign patient's experience or a special-procedure case; explain how to assess a verified story instead. Vary opening, structure, and angle; avoid repeating recent posts. Mention China Care Guide only occasionally and naturally. Use no hashtags. Return only the post text." },
-          { role: "user", content: `Topic: ${topic}\nBusiness context: China Care Guide helps international customers organize general healthcare inquiries and practical coordination for planned care in China. Areas of interest include health screening, specialist and surgical care, dental care, medical aesthetics, rehabilitation and recovery, traditional/integrative care, and practical travel coordination. We are not a healthcare provider and do not give clinical advice. Actual providers, services, costs, suitability, timing, interpretation, and follow-up must be confirmed individually.\nOfficial source note for this topic: ${officialSourceNotes[topic] || "No specific source note is supplied. Avoid current policy claims, statistics, rankings, price or outcome comparisons, and claims about a specific hospital. Make the post a useful checklist or question for the reader to verify with the hospital or clinician."}\nRecent posts to avoid repeating (use a new wording, angle, and opening): ${JSON.stringify(recentPosts)}` },
+          { role: "system", content: 'You are the English-language editorial writer for China Care Guide, a small coordination guide for international people exploring planned healthcare in China. Create three meaningfully adapted, platform-native posts from the same selected topic and return ONLY valid JSON with exactly these string fields: "x", "facebook", and "instagram". X must be at most 260 characters and concise; Facebook should be conversational, explain one useful planning point, and invite a genuine question (normally 2-4 short sentences); Instagram should have a clear opening, readable short lines, one practical takeaway and a gentle question (normally 80-160 words). Do not simply copy-paste one text with different lengths. All are educational, never generic healthcare slogans or advertisements. Do not claim China care is universally cheaper, faster, better, safer, or more experienced. Do not give medical advice, assess suitability, diagnose, recommend tests or treatment, name providers, or invent prices, statistics, availability, partnerships, patient stories, or outcomes. Frame clinical and preparation details as questions for the treating provider. Never imply a pilot or city policy applies across China. When an official source note is supplied, use only its narrow facts, preserve date and location, and include its official URL if making a policy or classification claim. Never invent a foreign patient experience or special-procedure case; explain how to assess a verified story instead. Avoid repeating recent posts and vary each platform’s hook, structure, and wording. Mention China Care Guide only occasionally and naturally. No hashtags; no markdown fences.' },
+          { role: "user", content: `Topic: ${topic}\nBusiness context: China Care Guide helps international customers organize general healthcare inquiries and practical coordination for planned care in China. Areas include health screening, specialist and surgical care, dental care, medical aesthetics, rehabilitation and recovery, traditional/integrative care, and practical travel coordination. We are not a healthcare provider and do not give clinical advice. Actual providers, services, costs, suitability, timing, interpretation, and follow-up must be confirmed individually.\nOfficial source note for this topic: ${officialSourceNotes[topic] || "No specific source note is supplied. Avoid current policy claims, statistics, rankings, price or outcome comparisons, and claims about a specific hospital. Make posts a useful checklist or question for the reader to verify with the hospital or clinician."}\nRecent posts to avoid repeating (create a new angle and wording): ${JSON.stringify(recentPosts)}` },
         ],
       }),
       signal: AbortSignal.timeout(25_000),
     });
     if (!completion.ok) return respond(res, 502, { message: "The model provider could not generate a draft. Try again later." });
     const result = await completion.json() as { choices?: Array<{ message?: { content?: unknown } }> };
-    const content = typeof result.choices?.[0]?.message?.content === "string" ? result.choices[0].message.content.trim().replace(/^\s*["“]|["”]\s*$/g, "") : "";
-    if (!content || content.length > 280) return respond(res, 502, { message: "The generated draft did not meet the length limit. Generate another draft." });
+    const rawContent = typeof result.choices?.[0]?.message?.content === "string" ? result.choices[0].message.content.trim().replace(/^```(?:json)?\s*|\s*```$/g, "") : "";
+    let content: { x?: unknown; facebook?: unknown; instagram?: unknown };
+    try { content = JSON.parse(rawContent) as typeof content; }
+    catch { return respond(res, 502, { message: "The model returned an invalid multi-platform draft. Generate another draft." }); }
+    const posts = [
+      { platform: "X", content: content.x, maxLength: 260 },
+      { platform: "Facebook", content: content.facebook, maxLength: 1200 },
+      { platform: "Instagram", content: content.instagram, maxLength: 1800 },
+    ];
+    if (posts.some((post) => typeof post.content !== "string" || !post.content.trim() || post.content.length > post.maxLength)) return respond(res, 502, { message: "One of the platform drafts did not meet its format limits. Generate the set again." });
 
     const save = await fetch(`${supabaseUrl}/rest/v1/social_drafts`, {
       method: "POST",
       headers: { ...authHeaders, "Content-Type": "application/json", Prefer: "return=representation" },
-      body: JSON.stringify({ topic, content, status: "draft", model, created_by: user.id }),
+      body: JSON.stringify(posts.map((post) => ({ topic: `${post.platform}: ${topic}`, content: (post.content as string).trim(), status: "draft", model, created_by: user.id }))),
       signal: AbortSignal.timeout(8000),
     });
     if (!save.ok) return respond(res, 502, { message: "Draft generated, but it could not be saved. Apply the social drafts database migration and try again." });
     const rows = await save.json() as Array<{ id: string; created_at: string; topic: string; content: string; status: string; model: string }>;
-    return respond(res, 201, { draft: rows[0] });
+    return respond(res, 201, { drafts: rows });
   } catch {
     return respond(res, 502, { message: "Draft generation is temporarily unavailable." });
   }
