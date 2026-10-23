@@ -193,25 +193,72 @@ function StaffInbox({ session, role, onSignOut }: { session: Session; role: Staf
   </div>;
 }
 
-const socialTopics = [
-  "How to ask for an itemized estimate for care in China",
-  "Questions about language support before booking",
-  "What to confirm about medical records and translations",
-  "Planning follow-up after returning home",
-  "How to compare what different care options include",
-  "Separating clinical decisions from travel coordination",
-  "Questions about timing, appointment length, and travel days",
-  "What to confirm with a hospital before health screening",
-  "Practical planning for a specialist consultation",
-  "Recovery logistics to discuss with the clinical team",
-  "How to ask about privacy and handling records",
-  "Starting an inquiry without sharing sensitive health details",
-  "Planning for a change in appointment or itinerary",
-  "What an independent coordinator can and cannot do",
-  "Questions to compare dental care options abroad",
-  "Planning a medical aesthetics inquiry responsibly",
-  "Questions about rehabilitation and recovery support",
-  "How to prepare questions for a traditional medicine consultation",
+const socialTopicGroups = [
+  { label: "Policy & international access", topics: [
+    "What China's national inbound medical-tourism policy actually says",
+    "How Shanghai's international-medical policy supports inbound care",
+    "What makes Hainan's Lecheng medical-tourism pilot different",
+    "National policy vs local pilot: what international patients should verify",
+  ] },
+  { label: "Hospitals & health system", topics: [
+    "What Grade III Class A means—and what it does not tell you",
+    "What to ask a hospital international department before booking",
+    "How international departments handle language and coordination",
+    "How to verify the right hospital department for a question",
+    "Public, private, and foreign-owned hospitals: compare scope, not labels",
+  ] },
+  { label: "Cities & practical planning", topics: [
+    "Practical differences to check when planning care in Beijing",
+    "Practical differences to check when planning care in Shanghai",
+    "How to compare Beijing and Shanghai without ranking their hospitals",
+    "City, travel, and follow-up: plan the whole care itinerary",
+  ] },
+  { label: "Costs, evidence & comparisons", topics: [
+    "Compare an estimate line by line before comparing prices",
+    "Why medical prices across countries are rarely like-for-like",
+    "How to evaluate clinical experience using relevant, dated evidence",
+    "Why speed and cost alone do not establish medical quality",
+    "Questions to ask about outcomes, risks, and the source of a claim",
+  ] },
+  { label: "Tests & diagnostics", topics: [
+    "What to confirm before a CT appointment",
+    "What to confirm before an MRI appointment",
+    "CT and MRI: ask the clinician which question each scan answers",
+    "How to prepare existing images and reports for a new consultation",
+    "Genetic testing: questions about consent, data, and interpretation",
+    "Rare and inherited conditions: coordinate records before travel",
+  ] },
+  { label: "Care areas", topics: [
+    "What to ask during a health-screening consultation",
+    "A specialist consultation: organize the question and records",
+    "Surgery planning: questions for the treating team before travel",
+    "Dental care abroad: align treatment stages, estimates, and follow-up",
+    "Aesthetic procedures: verify credentials, product, and aftercare",
+    "Anti-aging claims: look for evidence and clear risk information",
+    "Rehabilitation: agree on goals and review points with clinicians",
+    "Traditional medicine and integrative care: discuss fit with a clinician",
+    "Wellness and recuperation: separate lifestyle services from treatment",
+  ] },
+  { label: "Coordination & accompaniment", topics: [
+    "What a patient companion can do—and cannot do",
+    "Medical interpreter vs accompanying coordinator: distinct roles",
+    "What the care-coordination journey may look like",
+    "What to include in a first inquiry without sharing sensitive health details",
+    "Planning travel, lodging, and recovery days around care",
+    "What happens if an appointment or treatment plan changes",
+  ] },
+  { label: "Culture & everyday life", topics: [
+    "Chinese food culture and dietary needs during a care trip",
+    "Travel and daily-life planning around a medical appointment in China",
+    "What foreign visitors may want to know about hospital payment options",
+    "Culture, communication, and asking questions at a visit",
+  ] },
+  { label: "Patient stories & case studies", topics: [
+    "How to assess an online foreign-patient experience in China",
+    "What a single medical-travel story can—and cannot—show",
+    "How to share a patient story ethically: consent, privacy, and context",
+    "Case studies: separate verified facts from typical expectations",
+  ] },
 ];
 
 type DiscoveryLead = { id: string; created_at: string; source: string; source_name: string; url: string; title: string; excerpt: string; author: string; published_at: string | null; relevance_score: number | null; relevance_reason: string; reply_draft: string; status: "new" | "reviewed" | "dismissed"; reply_decision: "pending" | "approved" | "ignored" };
@@ -279,7 +326,7 @@ function DiscoveryQueue({ session, canEdit }: { session: Session; canEdit: boole
 
 function SocialContent({ session, role }: { session: Session; role: StaffRole }) {
   const [drafts, setDrafts] = useState<SocialDraft[]>([]);
-  const [topic, setTopic] = useState(socialTopics[0]);
+  const [topic, setTopic] = useState(socialTopicGroups[0].topics[0]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -329,7 +376,7 @@ function SocialContent({ session, role }: { session: Session; role: StaffRole })
     <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Human review required</strong>Drafts are saved for review and are never published automatically. Do not use this tool for personal health details or clinical advice.</p></div>
     <DiscoveryQueue session={session} canEdit={canEdit} />
     {message && <div className={message.startsWith("Could") || message.includes("failed") || message.includes("unavailable") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
-    {canEdit && <section className="crm-card social-generate"><div className="card-heading"><div><p className="admin-kicker">NEW DRAFT</p><h2>Generate an educational post</h2></div></div><div className="social-controls"><label htmlFor="social-topic">Choose an approved topic</label><select id="social-topic" onChange={(event) => setTopic(event.target.value)} value={topic}>{socialTopics.map((item) => <option key={item}>{item}</option>)}</select><button className="crm-primary" disabled={busy} onClick={() => void generate()} type="button">{busy ? "Generating…" : "Generate draft"}</button></div><p className="social-note">Uses the server-side SiliconFlow model key. Each click makes one billable model request.</p></section>}
+    {canEdit && <section className="crm-card social-generate"><div className="card-heading"><div><p className="admin-kicker">NEW DRAFT</p><h2>Generate an educational post</h2></div></div><div className="social-controls"><label htmlFor="social-topic">Choose an approved topic</label><select id="social-topic" onChange={(event) => setTopic(event.target.value)} value={topic}>{socialTopicGroups.map((group) => <optgroup key={group.label} label={group.label}>{group.topics.map((item) => <option key={item}>{item}</option>)}</optgroup>)}</select><button className="crm-primary" disabled={busy} onClick={() => void generate()} type="button">{busy ? "Generating…" : "Generate draft"}</button></div><p className="social-note">Posts are written for international readers planning care in China. Policy and hospital-system topics use official sources; each click makes one billable model request.</p></section>}
     <section className="social-drafts"><div className="card-heading"><div><p className="admin-kicker">REVIEW QUEUE</p><h2>Educational post drafts</h2></div></div>{loading ? <p className="inquiry-empty">Loading drafts…</p> : drafts.length ? drafts.map((draft) => <article className="crm-card social-draft" key={draft.id}><div className="social-draft-head"><div><p className="admin-kicker">{draft.topic}</p><small>{formatDate(draft.created_at)} · {draft.model}</small></div><span className={`crm-status ${draft.status === "approved" || draft.status === "published" ? "green" : draft.status === "rejected" ? "red" : "blue"}`}>{draft.status}</span></div><p className="social-draft-copy">{draft.content}</p><div className="social-draft-actions">{canEdit && draft.status === "draft" && <><button className="crm-secondary" onClick={() => void review(draft, "rejected")} type="button">Reject</button><button className="crm-secondary" onClick={() => void review(draft, "approved")} type="button">Approve</button></>}{draft.status === "approved" && <><button className="crm-secondary" onClick={() => void copyDraft(draft.content)} type="button">Copy post</button><a className="crm-secondary social-open-x" href="https://x.com/compose/post" rel="noreferrer" target="_blank">Open X to post manually</a></>}</div></article>) : <div className="crm-card"><p className="inquiry-empty">No drafts yet. Choose a topic above to create the first one.</p></div>}</section>
   </main>;
 }
