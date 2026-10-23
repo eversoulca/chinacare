@@ -46,10 +46,10 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
 }
 
 const images = {
-  hero: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Lobby_of_Shanghai_Ruijin_Hospital_outpatient_department%2C_Jun_2020.jpg/1280px-Lobby_of_Shanghai_Ruijin_Hospital_outpatient_department%2C_Jun_2020.jpg",
+  hero: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Lobby_of_The_Chinese_Medicine_Hospital_of_Hong_Kong.jpg/1280px-Lobby_of_The_Chinese_Medicine_Hospital_of_Hong_Kong.jpg",
   screening: "https://images.unsplash.com/photo-1666214280165-20e3d73d70bf?auto=format&fit=crop&w=1200&q=85",
   aesthetics: "https://images.unsplash.com/photo-1713085085470-fba013d67e65?auto=format&fit=crop&w=1200&q=85",
-  recovery: "https://images.pexels.com/photos/31234755/pexels-photo-31234755/free-photo-of-physical-therapist-assisting-patient-in-rehab-session.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  recovery: "https://images.unsplash.com/photo-1756789977315-945fd7c22263?auto=format&fit=crop&w=1200&q=85",
   tcm: "https://images.unsplash.com/photo-1598555763574-dca77e10427e?auto=format&fit=crop&w=1200&q=85",
   specialist: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=85",
   dental: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1200&q=85",
@@ -115,18 +115,18 @@ const destinations = [
   },
   {
     city: "Changchun",
-    image: "https://images.unsplash.com/photo-1619075957727-cf5f6b327ac5?auto=format&fit=crop&w=900&q=82",
-    text: "A northeast city framed by Nanhu Lake and a distinctive northern landscape.",
-    credit: "Sicheng Liu / Unsplash",
-    creditUrl: "https://unsplash.com/photos/city-skyline-across-body-of-water-during-daytime-9V2fYrseWLk",
+    image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Changchun_skyline_with_Ji_Tower_-_panoramio.jpg/1280px-Changchun_skyline_with_Ji_Tower_-_panoramio.jpg",
+    text: "A bright, elevated view of Changchun's skyline and landmark TV tower.",
+    credit: "wanghongliu / Wikimedia Commons · CC BY-SA 3.0",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Changchun_skyline_with_Ji_Tower_-_panoramio.jpg",
     tier: "secondary",
   },
   {
     city: "Dalian",
-    image: "https://images.unsplash.com/photo-1589721029322-95a8c51c0bfa?auto=format&fit=crop&w=900&q=82",
-    text: "A coastal city of sea views, bay bridges and a relaxed maritime character.",
-    credit: "Jerry Zhang / Unsplash",
-    creditUrl: "https://unsplash.com/photos/white-boat-on-sea-near-bridge-during-daytime-Kwse8pSkjDk",
+    image: "https://images.unsplash.com/photo-1707747686475-4a87ffe53653?auto=format&fit=crop&w=900&q=82",
+    text: "A sunny aerial view of Xinghai Square and Dalian's coastal cityscape.",
+    credit: "CJ / Unsplash",
+    creditUrl: "https://unsplash.com/photos/an-aerial-view-of-a-city-with-lots-of-green-grass-pd-hBCO4gcM",
     tier: "secondary",
   },
   {
@@ -485,8 +485,8 @@ Object.assign(zhText, Object.fromEntries([
   ["Guangzhou", "广州"],
   ["An international gateway and a current area of interest for individual inquiries.", "上海是国际交通门户，也是我们重点了解的赴华就医城市。"],
   ["China's capital and a current focus city for individual inquiries.", "北京是中国首都，也是我们重点了解的赴华就医城市。"],
-  ["A northeast city framed by Nanhu Lake and a distinctive northern landscape.", "长春：以南湖公园和独特的东北城市风貌为特色。"],
-  ["A coastal city of sea views, bay bridges and a relaxed maritime character.", "大连：拥有海湾景观、跨海大桥与舒展的海滨气质。"],
+  ["A bright, elevated view of Changchun's skyline and landmark TV tower.", "从高处眺望长春城市天际线与标志性电视塔。"],
+  ["A sunny aerial view of Xinghai Square and Dalian's coastal cityscape.", "晴朗日光下的大连星海广场与滨海城市航拍。"],
   ["Historic streets and Saint Sophia Cathedral reflect Harbin's distinctive northern culture.", "哈尔滨：历史街区与圣索菲亚教堂展现独特的北国风情。"],
   ["A vibrant southern gateway known for the Pearl River, Canton Tower and Lingnan culture.", "广州：以珠江、广州塔和岭南文化闻名的活力南方城市。"],
   ["CURRENT AREAS OF INTEREST", "目前重点了解的城市"],
@@ -575,7 +575,7 @@ function PublicSite({ locale }: { locale: Locale }) {
               </div>
             </div>
             <div className="hero-visual">
-              <div className="hero-image"><img alt="Illustrative lobby at Shanghai Ruijin Hospital outpatient department" src={images.hero} /><a className="hero-image-credit" href="https://commons.wikimedia.org/wiki/File:Lobby_of_Shanghai_Ruijin_Hospital_outpatient_department,_Jun_2020.jpg" target="_blank" rel="noreferrer">Illustrative lobby at Shanghai Ruijin Hospital · Photo: Lcsun / CC BY-SA 4.0 ↗</a></div>
+              <div className="hero-image"><img alt="Illustrative modern lobby at The Chinese Medicine Hospital of Hong Kong" src={images.hero} /><span className="hero-image-credit">Illustrative Hong Kong hospital lobby · Photo: <a href="https://commons.wikimedia.org/wiki/File:Lobby_of_The_Chinese_Medicine_Hospital_of_Hong_Kong.jpg" target="_blank" rel="noreferrer">Knowledge Era</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a></span></div>
               <div className="hero-card">
                 <span><Icon name="shield" size={23} /></span>
                 <div><strong>Another route to planned care</strong><p>MRI · CT · check-ups · specialist care · recovery stays</p></div>

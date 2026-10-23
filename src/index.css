@@ -161,6 +161,7 @@ h2 em, h1 em { color: var(--forest); font-weight: 400; }
 .destination-credit { color: #dbe1e8; display: block; font-size: .58rem; margin-top: 12px; }
 .destination-credit a { color: inherit; display: inline; font-size: inherit; font-weight: 400; margin: 0; }
 .hero-image-credit { background: rgba(19,29,42,.78); bottom: 14px; color: white; font-size: .57rem; left: 14px; line-height: 1.5; padding: 6px 9px; position: absolute; z-index: 2; }
+.hero-image-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 
 .process { background: var(--cream); }
 .process-line { counter-reset: process; display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
