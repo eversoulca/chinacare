@@ -50,8 +50,10 @@ Public-source discovery (the daily job is optional until configured):
 | `CRON_SECRET` | Authorizes the scheduled scan endpoint | Server only |
 | `RESEND_API_KEY` | Sends a daily digest of AI-ranked, pending leads to the staff admin | Server only |
 | `DISCOVERY_EMAIL_FROM` | Verified sender, for example `China Care Guide <alerts@notify.eversoul.ca>` | Server only |
+| `RESEND_RECEIVING_API_KEY` | Reads inbound email content after a verified Resend webhook arrives; use a separate Resend Full access key | Server only |
+| `RESEND_WEBHOOK_SECRET` | Verifies Resend's signed `email.received` webhook | Server only |
 
-Discovery runs once daily at 13:00 UTC. Each scan caps RSS at 8 feeds / 8 items per feed, YouTube at 3 search calls and up to 6 comment calls, and saves no more than 30 new items. If SiliconFlow is configured, one bounded model request ranks and drafts replies for up to 20 new items. Resend sends one digest email for leads scoring at least 60, once `RESEND_API_KEY` and a verified `DISCOVERY_EMAIL_FROM` are configured. No reply is sent or post published automatically. F5Bot's free email alerts can be imported manually; its automated feed/API access is a paid-plan feature.
+Discovery runs once daily at 13:00 UTC. Each scan caps RSS at 8 feeds / 8 items per feed, YouTube at 3 search calls and up to 6 comment calls, and saves no more than 30 new items. If SiliconFlow is configured, one bounded model request ranks and drafts replies for up to 20 new items. Resend sends a digest email for pending leads when `RESEND_API_KEY` and a verified `DISCOVERY_EMAIL_FROM` are configured. No reply is sent or post published automatically. The `/api/resend-inbound` endpoint accepts signed Resend `email.received` events, retrieves message content, and only processes F5Bot-sender mail addressed to `f5bot@notify.eversoul.ca`; configure the two inbound variables above and subscribe the endpoint to that event. F5Bot free email alerts can then enter the review queue automatically.
 
 Do not configure an automatic model fallback until the primary model is tested and a monthly spending cap is set; retries can create extra billable requests. Revoke any API key that has been pasted into a chat or otherwise exposed, then create a replacement directly in the provider console.
 
