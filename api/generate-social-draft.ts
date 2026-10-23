@@ -2,13 +2,24 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 type ApiRequest = IncomingMessage & { method?: string; body?: unknown };
 const topics = new Set([
-  "Questions to ask before choosing a provider",
-  "What a transparent estimate should include",
-  "Planning language support for a healthcare visit",
-  "Preparing for follow-up after returning home",
-  "Practical medical travel planning checklist",
-  "How to compare service inclusions and exclusions",
-  "A question to ask about medical records",
+  "How to ask for an itemized estimate for care in China",
+  "Questions about language support before booking",
+  "What to confirm about medical records and translations",
+  "Planning follow-up after returning home",
+  "How to compare what different care options include",
+  "Separating clinical decisions from travel coordination",
+  "Questions about timing, appointment length, and travel days",
+  "What to confirm with a hospital before health screening",
+  "Practical planning for a specialist consultation",
+  "Recovery logistics to discuss with the clinical team",
+  "How to ask about privacy and handling records",
+  "Starting an inquiry without sharing sensitive health details",
+  "Planning for a change in appointment or itinerary",
+  "What an independent coordinator can and cannot do",
+  "Questions to compare dental care options abroad",
+  "Planning a medical aesthetics inquiry responsibly",
+  "Questions about rehabilitation and recovery support",
+  "How to prepare questions for a traditional medicine consultation",
 ]);
 
 function respond(res: ServerResponse, status: number, data: Record<string, unknown>) {
@@ -75,6 +86,11 @@ export default async function handler(req: ApiRequest, res: ServerResponse) {
     const usage = await usageResponse.json() as Array<{ id: string }>;
     if (usage.length >= 5) return respond(res, 429, { message: "Daily draft limit reached (5 per editor). Try again tomorrow." });
 
+    const historySince = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const historyResponse = await fetch(`${supabaseUrl}/rest/v1/social_drafts?created_at=gte.${encodeURIComponent(historySince)}&select=content&order=created_at.desc&limit=30`, { headers: authHeaders, signal: AbortSignal.timeout(7000) });
+    const history = historyResponse.ok ? await historyResponse.json() as Array<{ content?: string }> : [];
+    const recentPosts = history.map(({ content }) => content?.trim()).filter((content): content is string => Boolean(content)).slice(0, 30);
+
     const input = await readJson(req) as { topic?: unknown };
     const topic = typeof input?.topic === "string" ? input.topic : "";
     if (!topics.has(topic)) return respond(res, 400, { message: "Choose a topic from the approved list." });
@@ -84,11 +100,11 @@ export default async function handler(req: ApiRequest, res: ServerResponse) {
       headers: { Authorization: `Bearer ${siliconFlowKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model,
-        temperature: 0.7,
-        max_tokens: 220,
+        temperature: 0.75,
+        max_tokens: 260,
         messages: [
-          { role: "system", content: "Write one useful, warm, non-promotional educational post for China Care Guide in English for X. Maximum 260 characters including spaces, leaving room under X's standard post limit. Give general travel coordination information only. Never give medical advice, diagnose, assess eligibility, promise outcomes, name providers, invent prices/statistics/availability, use urgency, or imply a partnership. Do not include hashtags or a URL. If relevant, make clear provider details must be confirmed individually. Return only the post text." },
-          { role: "user", content: `Topic: ${topic}\nApproved context: China Care Guide helps international customers organize healthcare inquiries and practical coordination in China. It is not a healthcare provider and does not give clinical advice. Provider participation, services, costs, suitability, and appointments require individual confirmation.` },
+          { role: "system", content: "You are the English-language editorial writer for China Care Guide, a small coordination guide for international people exploring planned healthcare in China. Write one short, specific, genuinely useful X post (maximum 260 characters including spaces). Speak to real cross-border planning questions: itemized estimates, language support, appointment logistics, records and translations, recovery planning, and follow-up across borders. Give the reader one concrete question to ask or one practical planning distinction they can use immediately. Avoid generic healthcare slogans, ad copy, fear, urgency, unsupported comparisons, and claims that China Care Guide can arrange a provider or outcome. Do not give medical advice, assess suitability, diagnose, recommend a treatment, name providers, invent prices, statistics, availability, or partnerships. Frame clinical and preparation details as questions to confirm with the treating provider. Vary the opening and structure; do not copy recent posts. Mention China Care Guide only occasionally and only when it naturally adds context. No hashtags or URL. Return only the post text." },
+          { role: "user", content: `Topic: ${topic}\nBusiness context: China Care Guide helps international customers organize general healthcare inquiries and practical coordination for planned care in China. Areas of interest include health screening, medical aesthetics, specialist and surgical care, dental care, rehabilitation, and traditional/integrative care. We are not a healthcare provider; we do not give clinical advice. Actual providers, services, costs, suitability, timing, interpretation, and follow-up must be confirmed individually.\nRecent posts to avoid repeating (use new wording, angle, and opening): ${JSON.stringify(recentPosts)}` },
         ],
       }),
       signal: AbortSignal.timeout(25_000),

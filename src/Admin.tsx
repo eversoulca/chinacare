@@ -194,13 +194,24 @@ function StaffInbox({ session, role, onSignOut }: { session: Session; role: Staf
 }
 
 const socialTopics = [
-  "Questions to ask before choosing a provider",
-  "What a transparent estimate should include",
-  "Planning language support for a healthcare visit",
-  "Preparing for follow-up after returning home",
-  "Practical medical travel planning checklist",
-  "How to compare service inclusions and exclusions",
-  "A question to ask about medical records",
+  "How to ask for an itemized estimate for care in China",
+  "Questions about language support before booking",
+  "What to confirm about medical records and translations",
+  "Planning follow-up after returning home",
+  "How to compare what different care options include",
+  "Separating clinical decisions from travel coordination",
+  "Questions about timing, appointment length, and travel days",
+  "What to confirm with a hospital before health screening",
+  "Practical planning for a specialist consultation",
+  "Recovery logistics to discuss with the clinical team",
+  "How to ask about privacy and handling records",
+  "Starting an inquiry without sharing sensitive health details",
+  "Planning for a change in appointment or itinerary",
+  "What an independent coordinator can and cannot do",
+  "Questions to compare dental care options abroad",
+  "Planning a medical aesthetics inquiry responsibly",
+  "Questions about rehabilitation and recovery support",
+  "How to prepare questions for a traditional medicine consultation",
 ];
 
 type DiscoveryLead = { id: string; created_at: string; source: string; source_name: string; url: string; title: string; excerpt: string; author: string; published_at: string | null; relevance_score: number | null; relevance_reason: string; reply_draft: string; status: "new" | "reviewed" | "dismissed"; reply_decision: "pending" | "approved" | "ignored" };
