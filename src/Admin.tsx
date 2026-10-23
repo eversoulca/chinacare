@@ -214,7 +214,7 @@ function DiscoveryQueue({ session, canEdit }: { session: Session; canEdit: boole
   const [excerpt, setExcerpt] = useState("");
   const load = async () => {
     if (!supabase) return;
-    const { data, error } = await supabase.from("social_discovery_leads").select("id,created_at,source,source_name,url,title,excerpt,author,published_at,relevance_score,relevance_reason,reply_draft,status,reply_decision").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await supabase.from("social_discovery_leads").select("id,created_at,source,source_name,url,title,excerpt,author,published_at,relevance_score,relevance_reason,reply_draft,status,reply_decision").or("relevance_score.gte.60,relevance_score.is.null").order("created_at", { ascending: false }).limit(100);
     if (error) setMessage("Could not load the discovery queue. Apply the social discovery migration first.");
     else setLeads((data ?? []) as DiscoveryLead[]);
   };
