@@ -1,5 +1,6 @@
 import { FormEvent, lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import PublicContent, { getContentPage } from "./PublicContent";
+import HealthScreeningPage from "./HealthScreeningPage";
 import { changeLocale, languages, localizedPath, localizeLinkClick, parseLocalizedPath, type Locale } from "./routing";
 
 const Admin = lazy(() => import("./Admin"));
@@ -475,7 +476,7 @@ function PublicSite({ locale }: { locale: Locale }) {
               <h1>Explore healthcare in China, with <em>confidence</em> and clarity.</h1>
               <p className="hero-lede"><strong>From health screening and medical aesthetics to rehabilitation and integrative care, our international team helps you explore options, understand costs, and coordinate your healthcare journey in China.</strong></p>
               <p className="hero-personal">A private, one-to-one planning service tailored to your interests, preferred destination, timing, and practical needs. You choose what to share, and we help clarify the next steps.</p>
-              <div className="hero-actions"><ButtonLink>Build My Care Plan</ButtonLink><ButtonLink href="#screening" secondary>Explore Health Screening</ButtonLink></div>
+              <div className="hero-actions"><ButtonLink>Build My Care Plan</ButtonLink><ButtonLink href="/services/health-screening-in-china" secondary>Explore Health Screening</ButtonLink></div>
               <button className="hero-chat-link" onClick={() => document.querySelector<HTMLButtonElement>(".assistant-launcher")?.click()}><Icon name="message" size={17} />Chat with our team</button>
               <div className="hero-trust">
                 <div><Icon name="globe" /><span>Coordination across <strong>Canada, Ireland, and China</strong></span></div>
@@ -637,6 +638,7 @@ export default function App() {
   if (path === "/admin" || path.startsWith("/admin/")) return <Suspense fallback={<div className="route-loading">Loading private workspace…</div>}><Admin /></Suspense>;
   const route = parseLocalizedPath(path);
   if (!route.locale) return <LocaleRedirect />;
+  if (route.path === "/services/health-screening-in-china") return <HealthScreeningPage locale={route.locale} />;
   const contentPage = getContentPage(route.path);
   if (contentPage) return <PublicContent locale={route.locale} page={contentPage} />;
   return <PublicSite locale={route.locale} />;
