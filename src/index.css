@@ -434,6 +434,9 @@ footer { background: #202d3d; color: white; padding: 76px 24px 30px; }
 .content-feature { margin: -55px auto 0; max-width: 1280px; padding: 0 24px 72px; }
 .content-feature img { aspect-ratio: 2.15 / 1; border-radius: 3px; display: block; object-fit: cover; width: 100%; }
 .content-feature figcaption { color: var(--muted); font-size: .7rem; margin-top: 9px; text-align: right; }
+.content-feature-rehabilitation { max-width: 980px; }
+.content-feature-rehabilitation img { aspect-ratio: 4 / 5; border-radius: 8px; margin: 0 auto; max-width: 620px; object-position: center; }
+.content-feature-rehabilitation figcaption { text-align: center; }
 .content-body { background: white; display: grid; gap: 100px; grid-template-columns: .8fr 1.2fr; padding: 115px max(24px, calc((100vw - 1280px) / 2)); }
 .content-body > div:first-child { position: sticky; top: 125px; height: max-content; }
 .content-body > div:first-child h2 { font-size: clamp(2.7rem, 4vw, 4.4rem); }
@@ -903,6 +906,7 @@ td small, td strong small { color: var(--crm-muted); display: block; font-size: 
   .content-hero h1 { font-size: clamp(3.1rem, 14vw, 4.6rem); }
   .content-feature { margin-top: -35px; padding: 0 20px 50px; }
   .content-feature img { aspect-ratio: 1.25 / 1; }
+  .content-feature-rehabilitation img { aspect-ratio: 4 / 5; max-width: 100%; }
   .content-body { padding: 80px 20px; }
   .content-service-links { padding: 45px 20px; }
   .content-cta { align-items: flex-start; flex-direction: column; gap: 30px; padding: 70px 20px; }
