@@ -1,9 +1,28 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { json, serviceHeaders, supabaseRestUrl } from "../lib/x-shared";
 
 type WebhookRequest = IncomingMessage & { method?: string };
 type ReceivedWebhook = { type?: string; data?: { email_id?: string; from?: string; to?: string[]; subject?: string } };
+
+function json(res: ServerResponse, status: number, data: Record<string, unknown>) {
+  res.statusCode = status;
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.end(JSON.stringify(data));
+}
+
+function serviceHeaders() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("Supabase service role key is not configured");
+  return { apikey: key, Authorization: `Bearer ${key}` };
+}
+
+function supabaseRestUrl(path: string) {
+  const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  if (!url) throw new Error("Supabase URL is not configured");
+  return `${url}/rest/v1/${path}`;
+}
 
 // Signature verification needs the exact bytes Resend sent; do not let Vercel parse JSON first.
 export const config = { api: { bodyParser: false } };
