@@ -1,19 +1,17 @@
 export const languages = [
   { code: "en", label: "English" },
   { code: "zh", label: "中文" },
-  { code: "ko", label: "한국어" },
-  { code: "ja", label: "日本語" },
-  { code: "fr", label: "Français" },
-  { code: "es", label: "Español" },
 ] as const;
 
 export type Locale = (typeof languages)[number]["code"];
 const localeCodes = new Set<string>(languages.map(({ code }) => code));
+const retiredLocaleCodes = new Set(["ko", "ja", "fr", "es"]);
 
 export function parseLocalizedPath(pathname: string): { locale: Locale | null; path: string } {
   const normalized = pathname.replace(/\/{2,}/g, "/");
   const [, first = "", ...rest] = normalized.split("/");
   if (localeCodes.has(first)) return { locale: first as Locale, path: `/${rest.join("/")}` || "/" };
+  if (retiredLocaleCodes.has(first)) return { locale: null, path: `/${rest.join("/")}` || "/" };
   return { locale: null, path: normalized || "/" };
 }
 

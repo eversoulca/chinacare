@@ -29,19 +29,36 @@ export function getContentPage(path: string) {
   return pages[path] ?? null;
 }
 
-const localeNotice: Record<Locale, string> = {
-  en: "",
-  zh: "此页面目前仅提供英文内容。其他语言内容正在准备中。",
-  ko: "현재 이 페이지는 영어로 제공됩니다. 다른 언어 콘텐츠를 준비하고 있습니다.",
-  ja: "現在、このページは英語で提供されています。他の言語のコンテンツを準備中です。",
-  fr: "Cette page est actuellement disponible en anglais. Les autres langues sont en préparation.",
-  es: "Esta página está disponible actualmente en inglés. Estamos preparando otros idiomas.",
+const zhPageCopy: Record<string, Pick<Page, "title" | "description" | "eyebrow" | "intro" | "sections">> = {
+  "/about": { title: "关于 China Care Guide | China Care Guide", description: "了解 China Care Guide 如何以透明协调，协助客户规划个性化赴华医疗行程。", eyebrow: "关于我们", intro: "我们协助国际客户了解并协调赴华计划性医疗服务，以清晰信息和实际支持回应每项咨询。", sections: [["协调服务", "我们整理信息、确认服务方问题、费用估算及实际安排。我们不是医疗机构、保险公司或急救服务。"], ["按个人情况协调", "每项咨询都会根据服务兴趣、目的地、时间和实际问题逐项审阅。服务及服务方是否可安排，均需个别确认。"], ["服务边界", "我们不作诊断或临床治疗建议，不保证服务或结果，也不替代合格医疗专业人员的意见。"]] },
+  "/contact": { title: "联系 China Care Guide | China Care Guide", description: "就赴华计划性医疗协调提交一般咨询。", eyebrow: "联系我们", intro: "从简短、无需承诺的咨询开始。无需注册账户或提交病历，也可以询问可能的下一步。", sections: [["提交一般咨询", "通过咨询表说明你感兴趣的服务、目的地和大致时间。请勿填写诊断、护照信息或上传医疗文件。"], ["提交后会怎样", "协调人员会查看信息，并协助确认实际问题。提交咨询不代表服务、服务方、预约、报价或医疗评估已经确认。"], ["联系渠道", "目前优先通过电子邮件联系。电话及其他商务渠道将在开通并测试后公布。"]] },
+  "/how-it-works": { title: "医疗协调流程 | China Care Guide", description: "了解从提交一般咨询到服务方调研、报价审阅和行程规划的步骤。", eyebrow: "服务流程", intro: "以清晰、有人参与的流程了解可选方案，再决定是否继续。", sections: [["1. 提交一般咨询", "告诉我们你感兴趣的服务、目的地和大致时间。无需账户或医疗文件。"], ["2. 调查当前选项", "团队会针对你的咨询确认服务是否可提供、服务方信息、预约要求、费用和语言支持。"], ["3. 核对具体信息", "我们整理已确认、估算、未包含，以及仍需服务方或临床团队确认的事项。"], ["4. 自行决定是否继续", "是否继续由你决定。医疗适宜性及治疗决定应由合格医疗专业人员作出。"]] },
+  "/destinations/": { title: "中国医疗目的地 | China Care Guide", description: "了解目前考虑的赴华医疗城市，并按具体咨询确认服务情况。", eyebrow: "中国目的地", intro: "上海、北京、长春、大连和哈尔滨是目前考虑的城市。每项服务、服务方及预约均需针对具体咨询确认。", sections: [["上海与北京", "这两座城市是目前重点了解的地区。服务情况、服务方信息及预约仍需实时确认。"], ["长春、大连与哈尔滨", "这些城市按每项咨询具体了解。请勿假设每座城市都能提供所有服务或服务方。"], ["规划完整行程", "除拟安排的服务外，还应考虑当地交通、住宿、翻译、恢复时间、病历资料及后续安排。"]] },
+  "/services/health-screening-in-china": { title: "中国健康体检 | China Care Guide", description: "了解赴华体检套餐、服务方、费用、行程及后续安排的确认要点。", eyebrow: "中国健康体检", intro: "了解可选体检项目、套餐包含内容，以及规划行程前需要确认的实际细节。", sections: [["我们可以协助比较什么？", "我们可以了解可选体检套餐、服务方信息、预约要求、套餐包含与排除项目、原币种报价及后续安排。"], ["需要确认哪些事项？", "询问具体检查项目、由谁审阅结果、如何提供报告、加项是否另收费，以及回国后可否安排跟进。"], ["重要说明", "China Care Guide 协调信息与咨询，不为你制定体检方案、不作诊断，也不替代合格医疗专业人员的建议。"]] },
+  "/services/medical-aesthetics-in-china": { title: "中国医疗美容 | China Care Guide", description: "了解赴华医疗美容咨询、服务方、费用、恢复及服务边界。", eyebrow: "中国医疗美容", intro: "比较已确认的选项，并了解从业范围、知情同意、恢复、复诊和完整行程费用。", sections: [["先接受专业评估", "服务是否提供及是否适合个人，应由合格专业人员评估。请确认由谁实施，以及需要哪些术前咨询。"], ["比较完整方案", "核对项目、服务方、已说明的风险、恢复计划、包含与排除内容、可能的额外费用、币种及报价有效期。"], ["不保证结果", "结果、适用资格、恢复情况和满意度均无法保证。关键临床及实际细节确认前，请勿作出旅行承诺。"]] },
+  "/services/healthy-aging": { title: "中国健康老龄化服务 | China Care Guide", description: "以审慎方式了解中国健康老龄化与皮肤健康服务及其局限。", eyebrow: "健康老龄化", intro: "了解经确认且有依据的服务，不作逆转衰老、预测寿命或保证个人结果的宣传。", sections: [["设定合理目标", "健康老龄化服务应以平衡证据、清晰范围和适当专业咨询为基础。"], ["区分健康管理与临床服务", "我们会说明某项服务是由合格服务方提供的医疗服务，还是非医疗健康体验。"], ["不作预测承诺", "任何检测或服务都不能独立预测确切寿命或保证抗衰老方案成功。"]] },
+  "/services/genetic-health-assessment": { title: "中国遗传健康评估 | China Care Guide", description: "了解在服务方经过核实的情况下，可选遗传健康评估协调服务。", eyebrow: "可选精准健康服务", intro: "仅在服务方、知情同意、隐私保障和结果解释安排经过核实时，才考虑将遗传健康评估作为独立可选服务。", sections: [["需要先确认的事项", "继续前应确认服务方、检测范围、实验室流程、知情同意、数据处理、检测局限及合格专业人员解释结果的安排。"], ["结果需要专业背景", "AI 助手和协调团队不解释个人遗传结果。请与合格医疗专业人员讨论检测结果。"], ["遗传检测不能承诺什么", "遗传检测不能独立确定成功治疗方案、预测确切寿命或逆转衰老。"]] },
+  "/services/rehabilitation-in-china": { title: "中国康复与恢复服务 | China Care Guide", description: "了解赴华康复及恢复服务，并确认监督、服务范围、费用和后续安排。", eyebrow: "康复与恢复", intro: "了解医疗康复及结构化恢复安排，并清晰区分临床照护与非医疗健康支持。", sections: [["了解服务范围", "确认项目属于医疗康复、治疗后支持，还是非医疗恢复住宿，并了解由谁提供监督。"], ["规划后续安排", "询问评估、治疗频率、记录、无障碍需求、陪同人员、当地交通及回国后的跟进。"], ["需个别评估", "服务可用性和适宜性取决于个人情况及合格专业人员的评估。"]] },
+  "/services/tcm-integrative-care": { title: "中国中医与整合照护 | China Care Guide", description: "了解赴华中医及整合照护，并区分合规临床服务与健康体验。", eyebrow: "中医与整合照护", intro: "了解中医服务时，确认从业者资质、服务范围、安全事项及协调安排。", sections: [["临床照护与健康体验不同", "我们区分适用执业范围内的专业服务与非医疗健康体验。"], ["告知现有治疗情况", "请与合格医疗专业人员讨论正在使用的药物、补充剂及现有治疗，以识别可能的相互作用或风险。"], ["整合不代表可以互相替代", "不应将常规医疗与传统疗法描述为等同，也不应假设它们适合所有人。"]] },
+  "/services/specialist-surgical-care": { title: "中国专科与手术服务 | China Care Guide", description: "了解需评估且视服务方情况而定的赴华专科及计划性手术服务。", eyebrow: "专科与手术服务", intro: "了解计划性医疗选项时，仔细确认评估要求、服务方信息、风险、行程时间、恢复和后续安排。", sections: [["安排旅行前", "确认评估要求、医生及机构信息、预计停留时间、恢复限制、陪同需求、资料、并发症预案及后续安排。"], ["报价需要完整背景", "报价应注明币种、包含与排除内容、可能的额外费用、适用前提及有效期。"], ["临床决定由专业人员作出", "治疗是否适合以及治疗决定，应由合格医疗专业人员作出。"]] },
+  "/services/dental-care": { title: "中国牙科服务 | China Care Guide", description: "了解赴华牙科咨询、治疗计划、就诊次数、材料、费用及后续安排。", eyebrow: "中国牙科服务", intro: "了解牙科咨询、修复治疗、材料、就诊次数、报价及后续安排的确认要点。", sections: [["需要就诊几次？", "部分治疗需要多个阶段或再次到访。请确认哪些内容可远程了解，哪些必须面诊后确定。"], ["比较相同范围的方案", "比较治疗范围、材料、服务方、影像检查、临时修复、返修、用药和复诊，不要只比较一个总价。"], ["评估后方案可能调整", "检查后初步报价可能改变。应保留早期报价版本，方便核对差异。"]] },
+  "/services/medical-travel-concierge": { title: "中国医疗旅行规划与协调 | China Care Guide", description: "从服务方调研和报价到当地支持及后续协调，规划赴华医疗行程。", eyebrow: "医疗旅行规划与协调", intro: "从选择服务方到就诊导航，我们协助了解并协调赴华医疗服务的实际安排。", sections: [["规划与准备", "我们可整理咨询、选项调研、报价、预约申请、文件清单、翻译协调、行程及出发准备。这是行政协调，不是诊断。"], ["就诊期间提供实际支持", "视情况并经确认后，可协调交通、住宿、口译、院内导航及当地陪同。"], ["明确后续安排", "就诊后可协助整理报告、翻译申请、服务方沟通及已确认的复诊安排。我们无法保证你所在国家的持续医疗照护。"]] },
+  "/destinations/shanghai": { title: "上海医疗服务 | China Care Guide", description: "了解上海面向国际客户的医疗协调，并确认服务方、费用、行程和后续问题。", eyebrow: "上海医疗服务", intro: "上海是国际交通门户，也是目前逐项了解医疗咨询的重点城市。", sections: [["我们可以了解什么", "我们可询问当前服务情况、服务方信息、语言支持、报价、预约要求及实际协调安排。"], ["出行前确认", "不预设服务方合作或预约可用。每项咨询都需要当前信息确认。"], ["规划完整行程", "除拟安排的服务外，还应考虑住宿、当地交通、翻译、恢复时间、病历和后续安排。"]] },
+  "/destinations/beijing": { title: "北京医疗服务 | China Care Guide", description: "了解北京医疗协调的服务方、报价、行程及后续安排。", eyebrow: "北京医疗服务", intro: "北京是目前重点了解的城市之一，具体服务及服务方需逐项确认。", sections: [["按咨询逐项协调", "根据你说明的服务兴趣、时间及实际需求调查可选方案。"], ["清晰呈现信息", "决定前，我们会尽量整理服务方、范围、报价、包含项、排除项及有效期。"], ["不是公开医疗目录", "China Care Guide 是协调服务机构，不是医院目录或医疗服务提供者。"]] },
+  "/destinations/changchun": { title: "长春医疗服务 | China Care Guide", description: "通过 China Care Guide 按具体咨询了解长春医疗选项。", eyebrow: "长春医疗服务", intro: "长春是我们目前关注的中国东北地区之一。", sections: [["逐项确认服务可用性", "我们不会暗示所有服务或服务方都可安排；每项咨询都需确认当前情况。"], ["整理需要确认的问题", "应一起核对服务方、服务范围、语言支持、报价详情、时间、交通和后续安排。"], ["协调服务不等于临床照护", "我们协助信息整理与沟通；临床决定仍由合格专业人员作出。"]] },
+  "/destinations/dalian": { title: "大连医疗服务 | China Care Guide", description: "了解大连医疗与恢复选项，并确认实际协调和行程安排。", eyebrow: "大连医疗服务", intro: "大连是目前逐项了解的沿海目的地之一。", sections: [["了解已确认的选项", "我们会针对咨询了解当前可用性，不发布未经核实的服务方或合作关系信息。"], ["了解完整费用", "实际比较应包括服务、协调、旅行、住宿、当地交通、翻译和后续安排。"], ["提前安排后续", "询问病历如何提供，以及回国后可能需要哪些支持。"]] },
+  "/destinations/harbin": { title: "哈尔滨医疗服务 | China Care Guide", description: "按具体咨询了解哈尔滨医疗服务及协调选项。", eyebrow: "哈尔滨医疗服务", intro: "哈尔滨是目前按具体咨询了解的中国东北目的地之一。", sections: [["当前信息很重要", "服务、服务方、预约和报价详情都必须针对具体咨询确认。"], ["做好实际准备", "季节、交通、住宿、语言支持、停留时间及后续安排都会影响规划。"], ["明确协调边界", "协调服务不保证服务可用、个人适用性、时间、费用或结果。"]] },
+  "/resources/": { title: "医疗信息资源 | China Care Guide", description: "了解医疗费用比较、国际就医准备和如何提出有效问题。", eyebrow: "资源中心", intro: "未来将提供经过审慎审阅的指南，帮助了解赴华计划性医疗服务。", sections: [["如何比较医疗费用", "比较服务范围、币种、包含与排除项、可能的额外费用、协调费、交通、住宿和后续安排。"], ["安排医疗旅行前的问题", "询问服务方、评估、知情同意、风险、记录、恢复、并发症、沟通及回国后的照护。"], ["内容发布标准", "未来健康信息应注明审阅日期、适用时的审阅人员，以及支持医疗说法的可靠来源。"]] },
 };
+
+export function getLocalizedContentPage(path: string, locale: Locale) {
+  return locale === "zh" ? zhPageCopy[path] ?? pages[path] ?? null : pages[path] ?? null;
+}
 
 export default function PublicContent({ page, locale }: { page: Page; locale: Locale }) {
   useEffect(() => {
     document.title = page.title;
-    document.documentElement.lang = "en";
+    document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.append(meta); }
     meta.content = page.description;
@@ -49,16 +66,15 @@ export default function PublicContent({ page, locale }: { page: Page; locale: Lo
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.append(canonical); }
     const canonicalPath = locale === "en" ? window.location.pathname : `/en${window.location.pathname.replace(/^\/(en|zh|ko|ja|fr|es)(?=\/|$)/, "") || "/"}`;
     canonical.href = `${window.location.origin}${canonicalPath}`;
-  }, [page]);
+  }, [page, locale]);
   return <div className="content-page" onClick={(event) => localizeLinkClick(event, locale)}>
-    <header className="content-nav"><a className="brand" href="/"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><nav><a href="/#process">How it works</a><a href="/resources/">Resources</a><a className="button" href="/#inquiry">Plan my visit</a><label className="content-language">Language<select aria-label="Choose language" value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></nav></header>
-    {locale !== "en" && <div className="locale-notice" role="status">{localeNotice[locale]}</div>}
+    <header className="content-nav"><a className="brand" href="/"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><nav><a href="/#process">{locale === "zh" ? "服务流程" : "How it works"}</a><a href="/resources/">{locale === "zh" ? "资源中心" : "Resources"}</a><a className="button" href="/#inquiry">{locale === "zh" ? "规划我的行程" : "Plan my visit"}</a><label className="content-language">{locale === "zh" ? "语言" : "Language"}<select aria-label={locale === "zh" ? "选择语言" : "Choose language"} value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></nav></header>
     <main>
-      <div className="breadcrumbs"><a href="/">Home</a><span>/</span><span>{page.eyebrow.toLowerCase()}</span></div>
-      <section className="content-hero"><p className="eyebrow">{page.eyebrow}</p><h1>{page.title.split(" | ")[0]}</h1><p>{page.intro}</p><a className="button" href="/#inquiry">Request an individual review</a></section>
-      <section className="content-body"><div><p className="eyebrow">CLEAR INFORMATION FIRST</p><h2>What to know before you decide.</h2><p>We help English-speaking customers investigate planned healthcare options in China. Information is organized to support questions and practical decisions—not to provide medical advice.</p></div><div>{page.sections.map(([title, text]) => <article key={title}><h2>{title}</h2><p>{text}</p></article>)}</div></section>
-      <section className="content-cta"><div><p className="eyebrow">START WITH A GENERAL INQUIRY</p><h2>Explore the next step without making a commitment.</h2></div><a className="button" href="/#inquiry">Plan my visit</a></section>
+      <div className="breadcrumbs"><a href="/">{locale === "zh" ? "首页" : "Home"}</a><span>/</span><span>{page.eyebrow.toLowerCase()}</span></div>
+      <section className="content-hero"><p className="eyebrow">{page.eyebrow}</p><h1>{page.title.split(" | ")[0]}</h1><p>{page.intro}</p><a className="button" href="/#inquiry">{locale === "zh" ? "提交个性化咨询" : "Request an individual review"}</a></section>
+      <section className="content-body"><div><p className="eyebrow">{locale === "zh" ? "先了解清楚，再作决定" : "CLEAR INFORMATION FIRST"}</p><h2>{locale === "zh" ? "决定前需要了解什么？" : "What to know before you decide."}</h2><p>{locale === "zh" ? "我们协助中文及英语客户了解赴华计划性医疗服务。信息用于帮助你提出问题并作出实际安排，不构成医疗建议。" : "We help customers investigate planned healthcare options in China. Information is organized to support questions and practical decisions—not to provide medical advice."}</p></div><div>{page.sections.map(([title, text]) => <article key={title}><h2>{title}</h2><p>{text}</p></article>)}</div></section>
+      <section className="content-cta"><div><p className="eyebrow">{locale === "zh" ? "提交一般咨询" : "START WITH A GENERAL INQUIRY"}</p><h2>{locale === "zh" ? "先了解下一步，再决定是否继续。" : "Explore the next step without making a commitment."}</h2></div><a className="button" href="/#inquiry">{locale === "zh" ? "规划我的行程" : "Plan my visit"}</a></section>
     </main>
-    <footer className="content-footer"><strong>China Care Guide</strong><p>Information and coordination only. Not a healthcare provider, insurer, or emergency service.</p><span>Business telephone: pending provisioning and testing</span></footer>
+    <footer className="content-footer"><strong>China Care Guide</strong><p>{locale === "zh" ? "仅提供信息与协调服务。不是医疗机构、保险公司或急救服务。" : "Information and coordination only. Not a healthcare provider, insurer, or emergency service."}</p><span>{locale === "zh" ? "商务电话：开通并测试后公布" : "Business telephone: pending provisioning and testing"}</span></footer>
   </div>;
 }
