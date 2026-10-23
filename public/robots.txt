@@ -16,3 +16,4 @@ Sitemap: https://eversoul.ca/sitemap.xml
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin
+Sitemap: https://eversoul.ca/sitemap.xml

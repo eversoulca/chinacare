@@ -96,9 +96,13 @@ const documents: Record<Locale, Record<"privacy-policy" | "terms-of-service", Le
 
 const pathKeys = ["privacy-policy", "terms-of-service"] as const;
 
+export function getLegalPageMetadata(locale: Locale, kind: (typeof pathKeys)[number]) {
+  return documents[locale][kind];
+}
+
 export default function LegalPage({ locale, kind }: { locale: Locale; kind: (typeof pathKeys)[number] }) {
   const page = documents[locale][kind];
-  const canonicalPath = localizedPath(`/${kind}`, "en");
+  const canonicalPath = localizedPath(`/${kind}`, locale);
   useEffect(() => {
     document.title = page.title;
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
@@ -114,19 +118,18 @@ export default function LegalPage({ locale, kind }: { locale: Locale; kind: (typ
     let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.append(canonical); }
     canonical.href = `${window.location.origin}${canonicalPath}`;
-    document.querySelectorAll('link[hreflang][data-legal-alternate="true"]').forEach((node) => node.remove());
-    for (const language of ["en", "zh"] as const) {
-      const alternate = document.createElement("link");
-      alternate.rel = "alternate";
-      alternate.hreflang = language === "zh" ? "zh-CN" : "en";
+    for (const [language, hreflang] of [["en", "en"], ["zh", "zh-CN"]] as const) {
+      let alternate = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+      if (!alternate) { alternate = document.createElement("link"); alternate.rel = "alternate"; alternate.hreflang = hreflang; document.head.append(alternate); }
       alternate.href = `${window.location.origin}${localizedPath(`/${kind}`, language)}`;
-      alternate.dataset.legalAlternate = "true";
-      document.head.append(alternate);
     }
+    let defaultAlternate = document.querySelector<HTMLLinkElement>('link[rel="alternate"][hreflang="x-default"]');
+    if (!defaultAlternate) { defaultAlternate = document.createElement("link"); defaultAlternate.rel = "alternate"; defaultAlternate.hreflang = "x-default"; document.head.append(defaultAlternate); }
+    defaultAlternate.href = `${window.location.origin}${localizedPath(`/${kind}`, "en")}`;
     let structuredData = document.getElementById("legal-page-structured-data") as HTMLScriptElement | null;
     if (!structuredData) { structuredData = document.createElement("script"); structuredData.id = "legal-page-structured-data"; structuredData.type = "application/ld+json"; document.head.append(structuredData); }
     structuredData.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "WebPage", name: page.title, description: page.description, dateModified: "2026-10-23", inLanguage: locale === "zh" ? "zh-CN" : "en", url: `${window.location.origin}${localizedPath(`/${kind}`, locale)}`, isPartOf: { "@type": "WebSite", name: "China Care Guide", url: window.location.origin } });
-    return () => { structuredData?.remove(); document.querySelectorAll('link[data-legal-alternate="true"]').forEach((node) => node.remove()); };
+    return () => { structuredData?.remove(); };
   }, [canonicalPath, kind, locale, page]);
 
   return <div className="content-page legal-page">

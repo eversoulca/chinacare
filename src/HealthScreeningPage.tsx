@@ -37,6 +37,12 @@ const wording = {
   },
 };
 
+export function getHealthScreeningMetadata(locale: Locale) {
+  return locale === "zh"
+    ? { title: "中国 MRI、CT 与健康体检 | China Care Guide", description: "了解赴华 MRI、CT、专科影像与综合体检选项。适合当地预约等待时间较长或难以安排检查的人士；由医疗机构确认项目与适宜性。" }
+    : { title: "MRI, CT & Health Screening in China | China Care Guide", description: "Explore MRI, CT, specialist imaging and comprehensive check-ups in China when local access is difficult. Each service and its suitability is confirmed by the medical institution." };
+}
+
 export default function HealthScreeningPage({ locale }: { locale: Locale }) {
   const language = locale === "zh" ? "zh" : "en";
   const copy = wording[language];
@@ -44,16 +50,31 @@ export default function HealthScreeningPage({ locale }: { locale: Locale }) {
   const homeHref = localizedPath("/", locale);
 
   useEffect(() => {
-    const title = language === "zh" ? "中国 MRI、CT 与健康体检 | China Care Guide" : "MRI, CT & Health Screening in China | China Care Guide";
-    const description = language === "zh" ? "了解赴华 MRI、CT、专科影像与综合体检选项。适合当地预约等待时间较长或难以安排检查的人士；由医疗机构确认项目与适宜性。" : "Explore MRI, CT, specialist imaging and comprehensive check-ups in China when local access is difficult. Each service and its suitability is confirmed by the medical institution.";
+    const { title, description } = getHealthScreeningMetadata(locale);
     document.title = title;
     document.documentElement.lang = language;
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.append(meta); }
     meta.content = description;
+    for (const [selector, value] of [[`meta[property="og:title"]`, title], [`meta[property="og:description"]`, description], [`meta[property="og:type"]`, "article"]] as const) {
+      let tag = document.querySelector<HTMLMetaElement>(selector);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute("property", selector.match(/\[property="([^"]+)"\]/)?.[1] ?? "og:title"); document.head.append(tag); }
+      tag.content = value;
+    }
     let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.append(canonical); }
-    canonical.href = `${window.location.origin}${localizedPath("/services/health-screening-in-china", "en")}`;
+    canonical.href = `${window.location.origin}${localizedPath("/services/health-screening-in-china", locale)}`;
+    for (const [alternateLocale, hreflang] of [["en", "en"], ["zh", "zh-CN"]] as const) {
+      let alternate = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+      if (!alternate) { alternate = document.createElement("link"); alternate.rel = "alternate"; alternate.hreflang = hreflang; document.head.append(alternate); }
+      alternate.href = `${window.location.origin}${localizedPath("/services/health-screening-in-china", alternateLocale)}`;
+    }
+    let defaultAlternate = document.querySelector<HTMLLinkElement>('link[rel="alternate"][hreflang="x-default"]');
+    if (!defaultAlternate) { defaultAlternate = document.createElement("link"); defaultAlternate.rel = "alternate"; defaultAlternate.hreflang = "x-default"; document.head.append(defaultAlternate); }
+    defaultAlternate.href = `${window.location.origin}${localizedPath("/services/health-screening-in-china", "en")}`;
+    let schema = document.getElementById("screening-page-structured-data") as HTMLScriptElement | null;
+    if (!schema) { schema = document.createElement("script"); schema.id = "screening-page-structured-data"; schema.type = "application/ld+json"; document.head.append(schema); }
+    schema.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: canonical.href, inLanguage: language, isPartOf: { "@type": "WebSite", name: "China Care Guide", url: window.location.origin } });
   }, [language]);
 
   return <div className="content-page screening-page" onClick={(event) => localizeLinkClick(event, locale)}>

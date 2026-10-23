@@ -1,7 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://eversoul.ca/en/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/about" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/about" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/about" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/about" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/contact</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/contact" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/contact" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/contact</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/contact" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/contact" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/how-it-works</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/how-it-works" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/how-it-works" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/how-it-works" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/how-it-works</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/how-it-works" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/how-it-works" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/how-it-works" />
+  </url>
+  <url>
     <loc>https://eversoul.ca/en/privacy-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/privacy-policy" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/privacy-policy</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/privacy-policy" />
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/privacy-policy" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/privacy-policy" />
@@ -13,10 +67,142 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/terms-of-service" />
   </url>
   <url>
-    <loc>https://eversoul.ca/en/services/medical-aesthetics-in-china</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/medical-aesthetics-in-china" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+    <loc>https://eversoul.ca/zh/terms-of-service</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/terms-of-service" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/beijing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/beijing" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/beijing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/beijing" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/beijing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/beijing" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/beijing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/beijing" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/changchun</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/changchun" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/changchun" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/changchun" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/changchun</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/changchun" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/changchun" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/changchun" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/dalian</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/dalian" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/dalian" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/dalian" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/dalian</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/dalian" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/dalian" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/dalian" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/guangzhou</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/guangzhou" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/guangzhou" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/guangzhou" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/guangzhou</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/guangzhou" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/guangzhou" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/guangzhou" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/harbin</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/harbin" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/harbin" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/harbin" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/harbin</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/harbin" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/harbin" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/harbin" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/destinations/shanghai</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/shanghai" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/shanghai" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/shanghai" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/destinations/shanghai</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/destinations/shanghai" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/destinations/shanghai" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/destinations/shanghai" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/resources/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/resources/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/resources/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/resources/" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/resources/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/resources/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/resources/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/resources/" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/dental-care</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/dental-care" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/dental-care" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/dental-care" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/services/dental-care</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/dental-care" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/dental-care" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/dental-care" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/genetic-health-assessment</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/genetic-health-assessment" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/genetic-health-assessment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/genetic-health-assessment" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/services/genetic-health-assessment</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/genetic-health-assessment" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/genetic-health-assessment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/genetic-health-assessment" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/health-screening-in-china</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/health-screening-in-china" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/health-screening-in-china" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/health-screening-in-china" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/services/health-screening-in-china</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/health-screening-in-china" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/health-screening-in-china" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/health-screening-in-china" />
   </url>
   <url>
     <loc>https://eversoul.ca/en/services/healthy-aging</loc>
@@ -25,16 +211,46 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/healthy-aging" />
   </url>
   <url>
+    <loc>https://eversoul.ca/zh/services/healthy-aging</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/healthy-aging" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/healthy-aging" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/healthy-aging" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/medical-aesthetics-in-china</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/medical-aesthetics-in-china" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/services/medical-aesthetics-in-china</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/medical-aesthetics-in-china" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/medical-aesthetics-in-china" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/en/services/medical-travel-concierge</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/medical-travel-concierge" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/medical-travel-concierge" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/medical-travel-concierge" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/services/medical-travel-concierge</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/medical-travel-concierge" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/medical-travel-concierge" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/medical-travel-concierge" />
+  </url>
+  <url>
     <loc>https://eversoul.ca/en/services/rehabilitation-in-china</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/rehabilitation-in-china" />
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/rehabilitation-in-china" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/rehabilitation-in-china" />
   </url>
   <url>
-    <loc>https://eversoul.ca/en/services/tcm-integrative-care</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/tcm-integrative-care" />
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/tcm-integrative-care" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/tcm-integrative-care" />
+    <loc>https://eversoul.ca/zh/services/rehabilitation-in-china</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/rehabilitation-in-china" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/rehabilitation-in-china" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/rehabilitation-in-china" />
   </url>
   <url>
     <loc>https://eversoul.ca/en/services/specialist-surgical-care</loc>
@@ -43,17 +259,21 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/specialist-surgical-care" />
   </url>
   <url>
-    <loc>https://eversoul.ca/en/services/dental-care</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/dental-care" />
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/dental-care" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/dental-care" />
+    <loc>https://eversoul.ca/zh/services/specialist-surgical-care</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/specialist-surgical-care" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/specialist-surgical-care" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/specialist-surgical-care" />
   </url>
-  <url><loc>https://eversoul.ca/zh/privacy-policy</loc></url>
-  <url><loc>https://eversoul.ca/zh/terms-of-service</loc></url>
-  <url><loc>https://eversoul.ca/zh/services/medical-aesthetics-in-china</loc></url>
-  <url><loc>https://eversoul.ca/zh/services/healthy-aging</loc></url>
-  <url><loc>https://eversoul.ca/zh/services/rehabilitation-in-china</loc></url>
-  <url><loc>https://eversoul.ca/zh/services/tcm-integrative-care</loc></url>
-  <url><loc>https://eversoul.ca/zh/services/specialist-surgical-care</loc></url>
-  <url><loc>https://eversoul.ca/zh/services/dental-care</loc></url>
+  <url>
+    <loc>https://eversoul.ca/en/services/tcm-integrative-care</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/tcm-integrative-care" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/tcm-integrative-care" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/tcm-integrative-care" />
+  </url>
+  <url>
+    <loc>https://eversoul.ca/zh/services/tcm-integrative-care</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eversoul.ca/en/services/tcm-integrative-care" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://eversoul.ca/zh/services/tcm-integrative-care" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eversoul.ca/en/services/tcm-integrative-care" />
+  </url>
 </urlset>

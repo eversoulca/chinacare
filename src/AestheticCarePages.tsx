@@ -132,7 +132,13 @@ const officialSources = [
   { label: "FDA: Consumer alert on stem-cell and exosome products", zh: "美国 FDA：干细胞与外泌体产品消费者提示", href: "https://www.fda.gov/vaccines-blood-biologics/consumers-biologics/consumer-alert-regenerative-medicine-products-including-stem-cells-and-exosomes" },
 ];
 
-export default function AestheticCarePage({ locale, kind }: { locale: Locale; kind: "medical-aesthetics-in-china" | "healthy-aging" }) {
+export type AestheticPageKind = "medical-aesthetics-in-china" | "healthy-aging";
+
+export function getAestheticPageMetadata(locale: Locale, kind: AestheticPageKind) {
+  return data[locale][kind];
+}
+
+export default function AestheticCarePage({ locale, kind }: { locale: Locale; kind: AestheticPageKind }) {
   const page = data[locale][kind];
   const isChinese = locale === "zh";
   const isAesthetic = kind === "medical-aesthetics-in-china";
@@ -152,20 +158,19 @@ export default function AestheticCarePage({ locale, kind }: { locale: Locale; ki
     setMeta('meta[property="og:type"]', "article");
     let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.append(canonical); }
-    canonical.href = `${window.location.origin}${localizedPath(`/services/${kind}`, "en")}`;
-    document.querySelectorAll('link[data-care-alternate="true"]').forEach((node) => node.remove());
-    for (const language of ["en", "zh"] as const) {
-      const alternate = document.createElement("link");
-      alternate.rel = "alternate";
-      alternate.hreflang = language === "zh" ? "zh-CN" : "en";
+    canonical.href = `${window.location.origin}${localizedPath(`/services/${kind}`, locale)}`;
+    for (const [language, hreflang] of [["en", "en"], ["zh", "zh-CN"]] as const) {
+      let alternate = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+      if (!alternate) { alternate = document.createElement("link"); alternate.rel = "alternate"; alternate.hreflang = hreflang; document.head.append(alternate); }
       alternate.href = `${window.location.origin}${localizedPath(`/services/${kind}`, language)}`;
-      alternate.dataset.careAlternate = "true";
-      document.head.append(alternate);
     }
+    let defaultAlternate = document.querySelector<HTMLLinkElement>('link[rel="alternate"][hreflang="x-default"]');
+    if (!defaultAlternate) { defaultAlternate = document.createElement("link"); defaultAlternate.rel = "alternate"; defaultAlternate.hreflang = "x-default"; document.head.append(defaultAlternate); }
+    defaultAlternate.href = `${window.location.origin}${localizedPath(`/services/${kind}`, "en")}`;
     let schema = document.getElementById("care-page-structured-data") as HTMLScriptElement | null;
     if (!schema) { schema = document.createElement("script"); schema.id = "care-page-structured-data"; schema.type = "application/ld+json"; document.head.append(schema); }
     schema.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "WebPage", name: page.title, description: page.description, dateModified: "2026-10-23", inLanguage: isChinese ? "zh-CN" : "en", url: `${window.location.origin}${localizedPath(`/services/${kind}`, locale)}`, isPartOf: { "@type": "WebSite", name: "China Care Guide", url: window.location.origin } });
-    return () => { schema?.remove(); document.querySelectorAll('link[data-care-alternate="true"]').forEach((node) => node.remove()); };
+    return () => { schema?.remove(); };
   }, [isChinese, kind, locale, page]);
 
   return <div className="content-page care-detail-page">

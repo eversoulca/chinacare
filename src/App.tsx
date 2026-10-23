@@ -1,4 +1,4 @@
-import { cloneElement, FormEvent, isValidElement, lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
+import { Children, cloneElement, FormEvent, isValidElement, lazy, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import PublicContent, { getLocalizedContentPage } from "./PublicContent";
 import LegalPage from "./LegalPages";
 import HealthScreeningPage from "./HealthScreeningPage";
@@ -507,7 +507,7 @@ Object.assign(zhText, Object.fromEntries([
 function translateNode(node: ReactNode, locale: Locale): ReactNode {
   if (locale !== "zh") return node;
   if (typeof node === "string") return zhText[node] ?? node;
-  if (Array.isArray(node)) return node.map((child) => translateNode(child, locale));
+  if (Array.isArray(node)) return Children.toArray(node).map((child) => translateNode(child, locale));
   if (!isValidElement<{ children?: ReactNode; [key: string]: unknown }>(node)) return node;
   const props: Record<string, unknown> = {};
   if (node.type === "option" && node.props.value === undefined && typeof node.props.children === "string") props.value = node.props.children;
@@ -527,11 +527,35 @@ function PublicSite({ locale }: { locale: Locale }) {
 
   useEffect(() => {
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
+    const pageTitle = locale === "zh" ? "赴华就医与个性化医疗协调 | China Care Guide" : "Private Healthcare in China | China Care Guide";
+    const pageDescription = locale === "zh"
+      ? "了解赴华 MRI、CT、健康体检、专科就诊与康复选项，并按需求协调就诊、口译、陪诊和行程。"
+      : "Explore private MRI, CT, health screening, specialist care and rehabilitation options in China, with personalized visit and travel coordination.";
+    document.title = pageTitle;
+    const setMeta = (selector: string, value: string) => {
+      let meta = document.querySelector<HTMLMetaElement>(selector);
+      if (!meta) { meta = document.createElement("meta"); document.head.append(meta); }
+      meta.content = value;
+    };
+    setMeta('meta[name="description"]', pageDescription);
+    setMeta('meta[property="og:title"]', pageTitle);
+    setMeta('meta[property="og:description"]', pageDescription);
+    setMeta('meta[property="og:type"]', "website");
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]') ?? document.createElement("link");
     canonical.rel = "canonical";
-    const englishUrl = new URL(localizedPath(window.location.pathname, "en"), window.location.origin);
-    canonical.href = englishUrl.href;
+    canonical.href = new URL(window.location.pathname, window.location.origin).href;
     if (!canonical.parentNode) document.head.append(canonical);
+    for (const [alternateLocale, hreflang] of [["en", "en"], ["zh", "zh-CN"]] as const) {
+      let alternate = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+      if (!alternate) { alternate = document.createElement("link"); alternate.rel = "alternate"; alternate.hreflang = hreflang; document.head.append(alternate); }
+      alternate.href = new URL(localizedPath(window.location.pathname, alternateLocale), window.location.origin).href;
+    }
+    let defaultAlternate = document.querySelector<HTMLLinkElement>('link[rel="alternate"][hreflang="x-default"]');
+    if (!defaultAlternate) { defaultAlternate = document.createElement("link"); defaultAlternate.rel = "alternate"; defaultAlternate.hreflang = "x-default"; document.head.append(defaultAlternate); }
+    defaultAlternate.href = new URL(localizedPath(window.location.pathname, "en"), window.location.origin).href;
+    let schema = document.getElementById("site-structured-data") as HTMLScriptElement | null;
+    if (!schema) { schema = document.createElement("script"); schema.id = "site-structured-data"; schema.type = "application/ld+json"; document.head.append(schema); }
+    schema.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": [{ "@type": "Organization", name: "China Care Guide", url: window.location.origin }, { "@type": "WebSite", name: "China Care Guide", url: window.location.origin, inLanguage: ["en", "zh-CN"] }, { "@type": "WebPage", name: pageTitle, description: pageDescription, url: canonical.href, inLanguage: locale === "zh" ? "zh-CN" : "en" }] });
   }, [locale]);
 
   const content = (

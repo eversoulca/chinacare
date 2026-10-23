@@ -97,15 +97,25 @@ export default function PublicContent({ page, locale }: { page: Page; locale: Lo
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.append(meta); }
     meta.content = page.description;
+    for (const [selector, value] of [[`meta[property="og:title"]`, page.title], [`meta[property="og:description"]`, page.description], [`meta[property="og:type"]`, "article"]] as const) {
+      let tag = document.querySelector<HTMLMetaElement>(selector);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute("property", selector.match(/\[property="([^"]+)"\]/)?.[1] ?? "og:title"); document.head.append(tag); }
+      tag.content = value;
+    }
     let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.append(canonical); }
-    const canonicalPath = locale === "en" ? window.location.pathname : `/en${window.location.pathname.replace(/^\/(en|zh|ko|ja|fr|es)(?=\/|$)/, "") || "/"}`;
-    canonical.href = `${window.location.origin}${canonicalPath}`;
+    canonical.href = `${window.location.origin}${window.location.pathname}`;
     for (const language of ["en", "zh-CN"] as const) {
       let alternate = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${language}"]`);
       if (!alternate) { alternate = document.createElement("link"); alternate.rel = "alternate"; alternate.hreflang = language; document.head.append(alternate); }
       alternate.href = `${window.location.origin}${localizedPath(window.location.pathname, language === "en" ? "en" : "zh")}`;
     }
+    let defaultAlternate = document.querySelector<HTMLLinkElement>('link[rel="alternate"][hreflang="x-default"]');
+    if (!defaultAlternate) { defaultAlternate = document.createElement("link"); defaultAlternate.rel = "alternate"; defaultAlternate.hreflang = "x-default"; document.head.append(defaultAlternate); }
+    defaultAlternate.href = `${window.location.origin}${localizedPath(window.location.pathname, "en")}`;
+    let schema = document.getElementById("public-page-structured-data") as HTMLScriptElement | null;
+    if (!schema) { schema = document.createElement("script"); schema.id = "public-page-structured-data"; schema.type = "application/ld+json"; document.head.append(schema); }
+    schema.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "WebPage", name: page.title, description: page.description, url: `${window.location.origin}${window.location.pathname}`, inLanguage: locale === "zh" ? "zh-CN" : "en", isPartOf: { "@type": "WebSite", name: "China Care Guide", url: window.location.origin } });
   }, [page, locale]);
   return <div className="content-page" onClick={(event) => localizeLinkClick(event, locale)}>
     <header className="content-nav"><a className="brand" href="/"><span className="brand-mark">CC</span><span>CHINA CARE<br />GUIDE</span></a><nav><a href="/#process">{locale === "zh" ? "服务流程" : "How it works"}</a><a href="/resources/">{locale === "zh" ? "资源中心" : "Resources"}</a><a className="button" href="/#inquiry">{locale === "zh" ? "规划我的行程" : "Plan my visit"}</a><label className="content-language">{locale === "zh" ? "语言" : "Language"}<select aria-label={locale === "zh" ? "选择语言" : "Choose language"} value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select></label></nav></header>
