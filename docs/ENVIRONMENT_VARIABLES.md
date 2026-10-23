@@ -48,8 +48,10 @@ Public-source discovery (the daily job is optional until configured):
 | `YOUTUBE_API_KEY` | YouTube Data API v3 key for recent video search and a small number of public video comments | Server only; restrict to YouTube Data API v3 in Google Cloud |
 | `SUPABASE_SERVICE_ROLE_KEY` | Saves discovered public excerpts from the server-side scan into the staff-only review queue | Server only; never expose in `VITE_*` |
 | `CRON_SECRET` | Authorizes the scheduled scan endpoint | Server only |
+| `RESEND_API_KEY` | Sends a daily digest of AI-ranked, pending leads to the staff admin | Server only |
+| `DISCOVERY_EMAIL_FROM` | Verified sender, for example `China Care Guide <alerts@notify.eversoul.ca>` | Server only |
 
-Discovery runs once daily at 13:00 UTC. Each scan caps RSS at 8 feeds / 8 items per feed, YouTube at 3 search calls and up to 6 comment calls, and saves no more than 30 new items. If SiliconFlow is configured, one bounded model request ranks and drafts replies for up to 20 new items. No reply is sent or post published automatically. F5Bot alerts arrive by email and can be pasted into the admin import form; automatic email ingestion is not configured.
+Discovery runs once daily at 13:00 UTC. Each scan caps RSS at 8 feeds / 8 items per feed, YouTube at 3 search calls and up to 6 comment calls, and saves no more than 30 new items. If SiliconFlow is configured, one bounded model request ranks and drafts replies for up to 20 new items. Resend sends one digest email for leads scoring at least 60, once `RESEND_API_KEY` and a verified `DISCOVERY_EMAIL_FROM` are configured. No reply is sent or post published automatically. F5Bot's free email alerts can be imported manually; its automated feed/API access is a paid-plan feature.
 
 Do not configure an automatic model fallback until the primary model is tested and a monthly spending cap is set; retries can create extra billable requests. Revoke any API key that has been pasted into a chat or otherwise exposed, then create a replacement directly in the provider console.
 

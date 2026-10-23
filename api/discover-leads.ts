@@ -23,6 +23,29 @@ function parseFeed(xml: string, sourceName: string): Lead[] {
   }).filter((item) => item.title && /^https?:\/\//i.test(item.url) && item.external_id);
 }
 function hash(value: string) { return Buffer.from(value).toString("base64url").slice(0, 180); }
+function htmlEscape(value: string) { return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!); }
+
+async function sendLeadDigest(headers: Record<string, string>) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.DISCOVERY_EMAIL_FROM;
+  if (!apiKey || !from) return;
+  try {
+  const pendingResponse = await fetch(supabaseRestUrl("social_discovery_leads?notified_at=is.null&relevance_score=gte.60&reply_draft=not.is.null&reply_decision=eq.pending&select=id,source_name,title,relevance_score,relevance_reason&order=relevance_score.desc&limit=10"), { headers, signal: AbortSignal.timeout(7000) });
+  if (!pendingResponse.ok) return;
+  const leads = await pendingResponse.json() as Array<{ id: string; source_name: string; title: string; relevance_score: number; relevance_reason: string }>;
+  if (!leads.length) return;
+  const adminResponse = await fetch(supabaseRestUrl("staff_access?role=eq.admin&select=email"), { headers, signal: AbortSignal.timeout(7000) });
+  if (!adminResponse.ok) return;
+  const recipients = [...new Set((await adminResponse.json() as Array<{ email: string }>).map(({ email }) => email).filter(Boolean))];
+  if (!recipients.length) return;
+  const rows = leads.map((lead) => `<li><strong>${htmlEscape(lead.title)}</strong> — ${htmlEscape(lead.source_name)} · ${lead.relevance_score}/100<br><span>${htmlEscape(lead.relevance_reason)}</span></li>`).join("");
+  const message = `China Care Guide has ${leads.length} public lead${leads.length === 1 ? "" : "s"} to review.`;
+  const sent = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ from, to: recipients, subject: `${leads.length} potential question${leads.length === 1 ? "" : "s"} to review`, text: `${message}\n\n${leads.map((lead) => `• ${lead.title} (${lead.source_name}, ${lead.relevance_score}/100)`).join("\n")}\n\nReview: https://eversoul.ca/admin`, html: `<p>${htmlEscape(message)}</p><ul>${rows}</ul><p><a href="https://eversoul.ca/admin">Open the private review queue</a></p><p>No reply is sent automatically.</p>` }), signal: AbortSignal.timeout(10000) });
+  if (!sent.ok) return;
+  const ids = leads.map(({ id }) => id).join(",");
+  await fetch(supabaseRestUrl(`social_discovery_leads?id=in.(${ids})`), { method: "PATCH", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ notified_at: new Date().toISOString() }), signal: AbortSignal.timeout(7000) });
+  } catch { /* A mail outage must not fail the source scan; the next run can retry. */ }
+}
 
 async function readRss(): Promise<Lead[]> {
   const feeds = (process.env.DISCOVERY_RSS_FEEDS || "").split(/[\r\n,]+/).map((value) => value.trim()).filter(Boolean).slice(0, MAX_RSS_FEEDS);
@@ -101,7 +124,7 @@ async function classify(leads: Lead[]) {
 async function runDiscovery(res: ServerResponse) {
   const headers = serviceHeaders();
   const collected = [...await readRss(), ...await readYouTube()].slice(0, MAX_NEW_PER_RUN);
-  if (!collected.length) return json(res, 200, { found: 0, message: "No new items. Add Google Alerts RSS feeds or configure a YouTube API key." });
+  if (!collected.length) { await sendLeadDigest(headers); return json(res, 200, { found: 0, message: "No new items. Add RSS feeds or configure a YouTube API key." }); }
   const candidates = collected.map((item) => ({ ...item, external_id: item.external_id || hash(item.url || item.title) }));
   const inserted = await fetch(supabaseRestUrl("social_discovery_leads?on_conflict=source,external_id"), { method: "POST", headers: { ...headers, "Content-Type": "application/json", Prefer: "resolution=ignore-duplicates,return=representation" }, body: JSON.stringify(candidates), signal: AbortSignal.timeout(12000) });
   if (!inserted.ok) return json(res, 503, { message: "Discovery queue could not save results. Apply the social discovery migration first." });
@@ -113,6 +136,7 @@ async function runDiscovery(res: ServerResponse) {
       await fetch(supabaseRestUrl(`social_discovery_leads?id=eq.${encodeURIComponent(row.id)}`), { method: "PATCH", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ relevance_score: score.score, relevance_reason: score.reason, reply_draft: score.reply }), signal: AbortSignal.timeout(5000) });
     }
   }
+  await sendLeadDigest(headers);
   return json(res, 200, { found: rows.length, classified: scores.length, message: rows.length ? `Saved ${rows.length} new public items for review.` : "No new items since the last scan." });
 }
 
@@ -129,6 +153,7 @@ async function importF5Bot(body: Record<string, unknown>, res: ServerResponse) {
   if (!rows.length) return json(res, 200, { found: 0, message: "This alert is already in the review queue." });
   const [score] = await classify([lead]);
   if (score) await fetch(supabaseRestUrl(`social_discovery_leads?id=eq.${encodeURIComponent(rows[0].id)}`), { method: "PATCH", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ relevance_score: score.score, relevance_reason: score.reason, reply_draft: score.reply }), signal: AbortSignal.timeout(5000) });
+  await sendLeadDigest(headers);
   return json(res, 201, { found: 1, message: "Alert added to the review queue." });
 }
 
