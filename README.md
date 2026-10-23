@@ -11,7 +11,7 @@ pnpm install
 pnpm dev
 ```
 
-Create a production build with `pnpm build`. The inquiry form stores minimal contact and planning details in Supabase after the database migrations are applied. The `/admin` inbox uses invite-only Supabase Auth and RLS; apply the staff migration and configure `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, the Auth redirect URL, and at least one staff role before using it.
+Create a production build with `pnpm build`. The inquiry form stores minimal contact and planning details in Supabase after the database migrations are applied. The `/admin` inbox uses password-based Supabase Auth and RLS; create staff accounts in Supabase Auth, assign an explicit `staff_access` role, and configure `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and the Auth redirect URL before using it.
 
 ## Current implementation status
 

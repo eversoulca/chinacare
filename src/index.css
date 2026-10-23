@@ -1028,7 +1028,7 @@ td small, td strong small { color: var(--crm-muted); display: block; font-size: 
   .conversation-context dl { grid-template-columns: 1fr; }
 }
 
-/* Real, invite-only staff inquiry inbox. */
+/* Real, staff-role-controlled inquiry inbox. */
 .staff-shell .crm-sidebar nav button { width: 100%; }
 .staff-shell .crm-sidebar nav button > span:first-child { font-size: 1rem; width: 22px; }
 .staff-shell .crm-sidebar nav button > span:nth-child(2) { flex: 1; text-align: left; }

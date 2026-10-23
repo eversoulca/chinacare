@@ -54,9 +54,9 @@ function Login({ onSubmit, onForgotPassword, message, busy }: { onSubmit: (email
         <p>Sign in to review customer inquiries and coordinate next steps.</p>
       </div>
       {!supabase ? <div className="crm-error" role="alert">Staff access is not configured yet. Ask the project administrator to set the public Supabase URL and key for this Vercel project.</div> : <>
-        <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Invite-only access</strong>Only accounts invited and authorized by an administrator can open the inquiry inbox. Customers do not create accounts.</p></div>
+        <div className="prototype-warning"><span aria-hidden="true">ⓘ</span><p><strong>Access is assigned by staff role</strong>Create the login in Supabase Authentication → Users, set its password, then grant it a role in <code>staff_access</code>. Only accounts with a staff role can open this inbox; customer accounts do not receive staff access.</p></div>
         <form className="login-form" onSubmit={submit}>
-          {message && <div className={message.startsWith("We ") || message.startsWith("That password") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
+          {message && <div className={message.startsWith("We ") || message.startsWith("That password") || message.startsWith("This Supabase account") ? "crm-error" : "demo-notice"} role="status">{message}</div>}
           <label>Work email<input autoComplete="email" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
           <label>Password<input autoComplete="current-password" name="password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
           <button className="crm-primary" disabled={busy} type="submit">{busy ? "Signing in…" : "Sign in"}</button>
@@ -349,7 +349,7 @@ export default function Admin() {
       const foundRole = data?.role as StaffRole | undefined;
       if (error || !foundRole || !["admin", "coordinator", "read_only"].includes(foundRole)) {
         setAuthorized(false);
-        setMessage("This account is not authorized for the staff inbox. Ask an administrator to grant access.");
+        setMessage("This Supabase account signed in, but it has no staff role. Add its user ID to public.staff_access with the admin role, then sign in again.");
         await supabase.auth.signOut();
       } else {
         setRole(foundRole);

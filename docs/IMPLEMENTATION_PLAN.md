@@ -16,7 +16,7 @@
 - Replaced the public site's green palette with slate blue, warm ivory, and muted terracotta accents.
 - Added installable PWA metadata, app icons, a small offline shell cache, and mobile home-screen instructions.
 - Added the customer inquiry table with restrictive RLS, a validated same-origin Vercel submission API, basic honeypot filtering, and real submission/error states in the public form. Visitors do not need accounts.
-- Replaced the demonstration `/admin` login and fictional lead records with invite-only Supabase magic-link access, role-gated inquiry viewing, and status updates.
+- Replaced the demonstration `/admin` login and fictional lead records with password-based Supabase Auth, explicit staff roles, role-gated inquiry viewing, and status updates. Staff accounts are created in Supabase Auth and then granted a role; customers do not get staff access.
 - Added Vercel SPA fallback rewrites, locale-prefixed routes, persistent language switching across the current route, and PWA English start URL. Current non-English routes are marked clearly as awaiting reviewed translation.
 
 ## Recommended delivery sequence
@@ -24,8 +24,8 @@
 1. Confirm production domain, legal company identity, office/contact details, and privacy/terms text.
 2. Restore/connect the project Git repository and verify its GitHub remote and Vercel project linkage.
 3. Translate and review the public content for Chinese, Korean, Japanese, French, and Spanish; then publish language-specific titles/descriptions, `lang`, `hreflang`, and canonicals. Evaluate prerendering or SSR so each public route ships meaningful HTML.
-4. Apply the inquiry and staff-access migrations; invite the owner, grant the initial `admin` role, configure the Vercel public Supabase values and Auth redirect allowlist, then verify staff login and RLS behavior.
-5. Add staff invitation/role management, assignment, status audit history, and exports with explicit authorization before broadening CRM use. Treat Free-plan auto-pause as a development constraint; keepalive is not an uptime guarantee.
+4. Apply the inquiry and staff-access migrations; create the owner in Supabase Auth, grant the initial `admin` role, configure the Vercel public Supabase values and Auth redirect allowlist, then verify staff login and RLS behavior.
+5. Add role-management UI, assignment, status audit history, and exports with explicit authorization before broadening CRM use. If customer registration is added later, keep customer profiles and permissions separate from `staff_access`. Treat Free-plan auto-pause as a development constraint; keepalive is not an uptime guarantee.
 6. Add secure transactional email only after sender-domain verification and credentials are configured. Do not claim an acknowledgment email is sent until delivery is integrated.
 7. Publish only reviewed service/destination content; add sitemap, canonical domain, and search-console submission after the production URL is known.
 

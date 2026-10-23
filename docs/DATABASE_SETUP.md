@@ -1,6 +1,6 @@
 # Database and inquiry setup
 
-The public inquiry flow now has a Vercel server endpoint (`/api/inquiries`) and a Supabase migration at `supabase/migrations/20261022000000_customer_inquiries.sql`. Customers do not need accounts: a short, no-login inquiry reduces friction and avoids collecting account credentials before a service is confirmed. Team access will use invite-only Supabase Auth when the private CRM is implemented.
+The public inquiry flow now has a Vercel server endpoint (`/api/inquiries`) and a Supabase migration at `supabase/migrations/20261022000000_customer_inquiries.sql`. Customers do not need accounts: a short, no-login inquiry reduces friction and avoids collecting account credentials before a service is confirmed. Staff use password-based Supabase Auth with explicit roles in `staff_access`.
 
 ## Apply the inquiry migration
 
@@ -33,22 +33,23 @@ Publishing is never scheduled automatically: an editor approves the draft, click
 
 ## Enable staff access
 
-Apply `supabase/migrations/20261023000000_staff_access.sql` after the inquiry migration. This adds invite-only roles (`admin`, `coordinator`, `read_only`) and grants the inbox only to authenticated accounts with a matching row in `staff_access`. Admins and coordinators may update inquiry status; read-only staff may view records.
+Apply `supabase/migrations/20261023000000_staff_access.sql` after the inquiry migration. This adds staff roles (`admin`, `coordinator`, `read_only`) and grants the inbox only to authenticated accounts with a matching row in `staff_access`. Admins and coordinators may update inquiry status; read-only staff may view records. An invitation is not required: the project owner can create the Auth user and set its password directly.
 
-1. In Supabase **Authentication → Users**, invite the first staff email address. The account must exist before a role can be assigned.
-2. In SQL Editor, replace the example email and run this once to grant that person admin access:
+1. In Supabase **Authentication → Users**, choose **Add user**, enter the staff email and password, and mark the email confirmed if Supabase offers that option. Do not create the user by inserting directly into `auth.users` with SQL.
+2. In SQL Editor, replace the example email with the exact Auth user's email and run this to grant admin access:
 
    ```sql
    insert into public.staff_access (user_id, email, role)
    select id, email, 'admin' from auth.users where lower(email) = lower('owner@example.com')
-   on conflict (user_id) do update set email = excluded.email, role = excluded.role;
+   on conflict (user_id) do update set email = excluded.email, role = excluded.role
+   returning user_id, email, role;
    ```
 
 3. In Supabase **Authentication → URL Configuration**, add `https://eversoul.ca/admin` and `https://eversoul.ca/admin/reset-password` to the allowed redirect URLs.
 4. In the Vercel `chinacare` project, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the same values as `SUPABASE_URL` and `SUPABASE_ANON_KEY`. These are public URL/key values; RLS provides the authorization boundary. Never add a service-role/secret key under a `VITE_` name.
-5. Redeploy. Open `https://eversoul.ca/admin` and sign in with the invited staff email and its password. Passwords must be set using Supabase Auth's supported user management flow; never update `auth.users` with SQL or expose a service-role key in the browser. Grant access only to people who should see inquiry contact details.
+5. Redeployment is not needed when only adding a user or role. Open `https://eversoul.ca/admin` and sign in with the created user's email and password. The Auth account must also have a matching `staff_access` row; a Supabase account without that row is denied access. Never update `auth.users` with SQL or expose a service-role key in the browser. Grant access only to people who should see inquiry contact details.
 
-The UI does not create users. Staff invitations and role grants are administrator-controlled. Supabase's default email service may only deliver to team-authorized addresses and is intended for low-volume testing; configure custom SMTP if it cannot deliver to the invited address.
+The UI does not create users or provide public sign-up. Supabase Auth accounts and staff role grants are managed in the Supabase project. Normal customer registrations, if added later, should use a separate customer profile/role model and must never be granted a `staff_access` role by default. Supabase's default email service may only deliver to team-authorized addresses and is intended for low-volume testing; configure custom SMTP if password reset email cannot be delivered.
 
 The inquiry form requests only contact and planning details. Do not ask visitors to submit diagnoses, medical records, passport data, or payment details through it. Confirm retention, privacy wording, data location, and cross-border handling before promoting the form for business use.
 

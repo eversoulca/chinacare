@@ -1,4 +1,4 @@
--- Invite-only staff access for the private inquiry inbox.
+-- Explicit staff-role access for the private inquiry inbox.
 -- Customer accounts are intentionally not part of the product.
 create table if not exists public.staff_access (
   user_id uuid primary key references auth.users(id) on delete cascade,
